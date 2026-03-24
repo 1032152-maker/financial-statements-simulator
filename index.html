@@ -1,0 +1,409 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>財務三表 シミュレーター</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+:root {
+  --bg:#f2f5f8;
+  --bg2:#eaeff4;
+  --bg3:#dfe7ef;
+  --surface:#ffffff;
+  --surface2:#f7f9fc;
+  --border:#dce4ed;
+  --border2:#ccd5e0;
+  --text:#1a2535;
+  --text2:#4a5b6e;
+  --text3:#8fa2b4;
+  --sage:#3e7068;
+  --sage-dark:#2c5550;
+  --sage-light:#ebf3f0;
+  --navy:#2a4a7c;
+  --navy-light:#e8eef8;
+  --umber:#7a5230;
+  --up:#1a5c3a;
+  --down:#8b2020;
+  --shadow:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.05);
+  --shadow2:0 4px 20px rgba(0,0,0,.10);
+  --radius:8px;
+  --radius2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh;}
+
+/* ── HEADER ── */
+.header{
+  background:var(--surface);
+  border-bottom:1px solid var(--border);
+  padding:10px 18px;
+  position:sticky;top:0;z-index:100;
+  box-shadow:var(--shadow);
+}
+.header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
+.app-title{
+  font-size:14px;font-weight:700;
+  color:var(--sage);letter-spacing:.02em;
+  display:flex;align-items:center;gap:7px;
+}
+.app-title svg{width:17px;height:17px;stroke-width:2;}
+.btn-reset{
+  background:transparent;color:var(--text3);
+  border:1px solid var(--border);
+  padding:4px 11px;border-radius:5px;cursor:pointer;
+  font-size:11px;font-weight:500;
+  font-family:'Noto Sans JP',sans-serif;
+  display:flex;align-items:center;gap:5px;
+  transition:all .15s;
+}
+.btn-reset:hover{border-color:var(--text2);color:var(--text2);background:var(--bg2);}
+.btn-reset svg{width:12px;height:12px;}
+.kpi-row{display:flex;gap:6px;flex-wrap:wrap;}
+.kpi{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:6px;padding:5px 10px;min-width:95px;flex:1;
+}
+.kpi-label{font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;}
+.kpi-val{font-size:14px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.kpi-val.pos{color:var(--up);}
+.kpi-val.neg{color:var(--down);}
+.period-chip{
+  background:var(--sage);color:#fff;
+  border-radius:20px;padding:2px 11px;
+  font-size:10px;font-weight:600;letter-spacing:.04em;
+}
+
+/* ── LAYOUT ── */
+.app-body{display:flex;min-height:calc(100vh - 108px);}
+
+/* ── SIDEBAR ── */
+.sidebar{
+  width:228px;min-width:208px;
+  background:var(--surface);border-right:1px solid var(--border);
+  padding:10px;overflow-y:auto;
+  max-height:calc(100vh - 108px);
+  position:sticky;top:108px;
+}
+.lv-select-label{
+  font-size:9px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:4px;display:block;
+}
+.lv-select{
+  width:100%;padding:6px 28px 6px 9px;
+  border:1.5px solid var(--border);border-radius:6px;
+  background:var(--surface2);color:var(--text);
+  font-size:12px;font-family:'Noto Sans JP',sans-serif;font-weight:600;
+  cursor:pointer;appearance:none;-webkit-appearance:none;
+  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fa2b4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
+  background-repeat:no-repeat;background-position:right 9px center;
+  margin-bottom:7px;transition:border-color .15s;
+}
+.lv-select:focus{outline:none;border-color:var(--sage);}
+.lv-info-bar{
+  border-radius:6px;padding:6px 9px;margin-bottom:9px;
+  font-size:10px;font-weight:500;color:#fff;line-height:1.55;
+}
+.btn-section{margin-bottom:7px;}
+.btn-section-title{
+  display:flex;align-items:center;gap:5px;
+  font-size:9px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;
+  margin-bottom:3px;padding-bottom:3px;
+  border-bottom:1px solid var(--border);
+}
+.btn-section-title svg{width:10px;height:10px;flex-shrink:0;opacity:.75;stroke-width:2.2;}
+.lv-panel{display:none;}
+.lv-panel.active{display:block;}
+.txn-btn{
+  display:flex;justify-content:space-between;align-items:center;
+  width:100%;text-align:left;
+  padding:6px 8px 6px 10px;margin-bottom:1px;
+  border-radius:4px;border:none;
+  border-left:2px solid transparent;
+  background:transparent;color:var(--text2);
+  cursor:pointer;font-size:11.5px;font-weight:400;
+  font-family:'Noto Sans JP',sans-serif;
+  transition:all .12s;line-height:1.4;
+}
+.txn-btn:hover{
+  background:var(--bg2);
+  border-left-color:var(--sage);
+  color:var(--text);
+}
+.txn-btn .amt{
+  font-family:'JetBrains Mono',monospace;font-size:10px;
+  color:var(--text3);background:var(--bg3);
+  padding:1px 5px;border-radius:3px;
+  white-space:nowrap;flex-shrink:0;letter-spacing:.01em;
+}
+
+/* ── MAIN ── */
+.main{flex:1;padding:10px;overflow-x:hidden;min-width:0;}
+.journal-strip{
+  background:var(--surface);border:1px solid var(--border);
+  border-left:3px solid var(--sage);
+  border-radius:var(--radius);padding:9px 13px;
+  margin-bottom:7px;min-height:48px;
+}
+.j-title{
+  font-size:9px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;
+}
+.journal-entry{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
+.journal-note{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.55;}
+.dr{color:var(--up);font-weight:600;}
+.cr{color:var(--down);font-weight:600;}
+
+.eq-bar{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:6px 12px;
+  margin-bottom:7px;
+  display:flex;align-items:center;gap:10px;font-size:11px;flex-wrap:wrap;
+}
+.eq-ok{color:var(--sage);font-weight:600;}
+.eq-ng{color:var(--down);font-weight:600;}
+.eq-formula{color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:11px;}
+
+/* ── STATEMENTS ── */
+.stmt-grid{
+  display:grid;grid-template-columns:1fr 1fr 1fr;
+  gap:8px;margin-bottom:8px;
+}
+@media(max-width:1100px){.stmt-grid{grid-template-columns:1fr 1fr;}}
+@media(max-width:700px){.stmt-grid{grid-template-columns:1fr;}}
+.stmt-card{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius2);overflow:hidden;box-shadow:var(--shadow);
+}
+.stmt-card.pulse{animation:pulse .4s ease;}
+@keyframes pulse{
+  0%{box-shadow:0 0 0 0 rgba(62,112,104,.3)}
+  70%{box-shadow:0 0 0 7px transparent}
+  100%{box-shadow:var(--shadow)}
+}
+.stmt-head{
+  padding:8px 12px;font-size:11px;font-weight:700;color:#fff;
+  letter-spacing:.03em;display:flex;align-items:center;gap:6px;
+}
+.stmt-head svg{width:13px;height:13px;opacity:.85;stroke-width:2.2;}
+.stmt-head.bs{background:var(--sage);}
+.stmt-head.pl{background:var(--navy);}
+.stmt-head.cf{background:var(--umber);}
+.stmt-body{padding:6px;}
+
+/* ── WC BAR (below statements) ── */
+.wc-bar{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 12px;
+  margin-bottom:8px;
+  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+}
+.wc-title{
+  font-size:9px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;
+}
+.wc-metrics{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
+.wc-m{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:5px;padding:4px 9px;
+  display:flex;flex-direction:column;align-items:center;min-width:82px;
+}
+.wc-m-lbl{font-size:8.5px;color:var(--text3);font-weight:600;white-space:nowrap;}
+.wc-m-val{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.wc-m-val.warn{color:var(--umber);}
+.wc-m-val.ok{color:var(--sage);}
+.wc-params{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
+.wc-params label{
+  font-size:9.5px;color:var(--text3);
+  display:flex;align-items:center;gap:3px;white-space:nowrap;
+}
+.wc-params input{
+  width:42px;background:var(--surface2);
+  border:1px solid var(--border);color:var(--text);
+  border-radius:4px;padding:2px 4px;
+  font-size:11px;text-align:center;
+}
+
+/* ── EQUITY BAR ── */
+.eq-struct{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:8px 13px;margin-bottom:8px;
+}
+.eq-struct h4{
+  font-size:9px;font-weight:700;color:var(--text3);
+  margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;
+}
+.eq-bar-track{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:4px;}
+.eq-bar-fill{height:100%;background:var(--sage);transition:width .45s cubic-bezier(.4,0,.2,1);}
+.eq-labels{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);}
+
+/* ── TABLES ── */
+table.stmt-tbl{width:100%;border-collapse:collapse;}
+table.stmt-tbl tr{border-bottom:1px solid var(--border);}
+table.stmt-tbl tr:last-child{border-bottom:none;}
+table.stmt-tbl td{padding:4px 5px;font-size:12px;line-height:1.4;}
+table.stmt-tbl td:last-child{
+  text-align:right;font-family:'JetBrains Mono',monospace;
+  font-weight:600;font-size:11px;white-space:nowrap;
+}
+.row-group{background:var(--bg2);}
+.row-group td{font-weight:700;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;}
+.row-total td{font-weight:700;background:var(--bg3);font-size:12px;}
+.row-subtotal td{font-weight:600;background:var(--bg2);font-size:11px;color:var(--text2);}
+.val-pos{color:var(--up);}
+.val-neg{color:var(--down);}
+.val-zero{color:var(--text3);}
+.indent1{padding-left:14px!important;}
+
+/* ── LOG ── */
+.log-section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius);padding:9px 13px;
+}
+.log-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
+.log-title{font-size:11px;font-weight:700;color:var(--text2);}
+.btn-clear{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text3);padding:3px 8px;border-radius:4px;
+  cursor:pointer;font-size:10px;transition:all .12s;
+}
+.btn-clear:hover{border-color:var(--text3);color:var(--text2);}
+.log-list{max-height:140px;overflow-y:auto;}
+.log-card{
+  display:flex;align-items:flex-start;gap:7px;padding:4px 0;
+  border-bottom:1px solid var(--border2);font-size:10.5px;
+}
+.log-card:last-child{border-bottom:none;}
+.log-dot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0;}
+.log-meta{color:var(--text3);font-size:9.5px;margin-right:3px;white-space:nowrap;font-family:'JetBrains Mono',monospace;}
+.log-txt{color:var(--text2);}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-top">
+    <div style="display:flex;align-items:center;gap:9px;">
+      <span class="app-title">
+        <i data-lucide="bar-chart-3"></i>
+        財務三表 シミュレーター
+      </span>
+      <span class="period-chip" id="period-chip">第1期</span>
+    </div>
+    <button class="btn-reset" onclick="resetAll()">
+      <i data-lucide="rotate-ccw"></i>
+      リセット
+    </button>
+  </div>
+  <div class="kpi-row">
+    <div class="kpi"><div class="kpi-label">総資産</div><div class="kpi-val" id="kpi-ta">¥10,000</div></div>
+    <div class="kpi"><div class="kpi-label">売上高</div><div class="kpi-val" id="kpi-rev">—</div></div>
+    <div class="kpi"><div class="kpi-label">純利益</div><div class="kpi-val" id="kpi-ni">—</div></div>
+    <div class="kpi"><div class="kpi-label">現金</div><div class="kpi-val" id="kpi-cash">¥10,000</div></div>
+    <div class="kpi"><div class="kpi-label">自己資本比率</div><div class="kpi-val" id="kpi-er">100.0%</div></div>
+    <div class="kpi"><div class="kpi-label">繰越利益剰余金</div><div class="kpi-val" id="kpi-re">—</div></div>
+  </div>
+</div>
+
+<div class="app-body">
+
+<div class="sidebar">
+  <span class="lv-select-label">学習レベル</span>
+  <select class="lv-select" id="lv-select" onchange="switchLevel(parseInt(this.value))">
+    <option value="1">Lv.1 ── 入門</option>
+    <option value="2">Lv.2 ── 初級</option>
+    <option value="3">Lv.3 ── 中級</option>
+    <option value="4">Lv.4 ── 準上級</option>
+    <option value="5">Lv.5 ── 上級</option>
+    <option value="6">Lv.6 ── 超上級</option>
+    <option value="7">Lv.7 ── エキスパート</option>
+    <option value="8">Lv.8 ── プロ</option>
+    <option value="9">Lv.9 ── マスター</option>
+    <option value="10">Lv.10 ── 総復習</option>
+  </select>
+  <div class="lv-info-bar" id="lv-info-bar"></div>
+  <div id="panels-container"></div>
+</div>
+
+<div class="main">
+
+  <div class="journal-strip">
+    <div class="j-title">仕訳 / 解説</div>
+    <div class="journal-entry" id="journal-entry">（取引ボタンを押すと仕訳が表示されます）</div>
+    <div class="journal-note" id="journal-note"></div>
+  </div>
+
+  <div class="eq-bar">
+    <span id="eq-status" class="eq-ok">BS 均衡</span>
+    <span class="eq-formula" id="eq-formula">資産 ¥10,000 ＝ 負債 ¥0 ＋ 純資産 ¥10,000</span>
+  </div>
+
+  <div class="stmt-grid">
+    <div class="stmt-card" id="card-bs">
+      <div class="stmt-head bs">
+        <i data-lucide="table-2"></i>
+        貸借対照表（BS）
+      </div>
+      <div class="stmt-body" id="bs-body"></div>
+    </div>
+    <div class="stmt-card" id="card-pl">
+      <div class="stmt-head pl">
+        <i data-lucide="trending-up"></i>
+        損益計算書（PL）
+      </div>
+      <div class="stmt-body" id="pl-body"></div>
+    </div>
+    <div class="stmt-card" id="card-cf">
+      <div class="stmt-head cf">
+        <i data-lucide="activity"></i>
+        キャッシュフロー計算書（CF）
+      </div>
+      <div class="stmt-body" id="cf-body"></div>
+    </div>
+  </div>
+
+  <!-- 運転資本管理 は三表の下に移動 -->
+  <div class="wc-bar">
+    <div class="wc-title">運転資本管理</div>
+    <div class="wc-metrics">
+      <div class="wc-m"><div class="wc-m-lbl">売掛金（AR）</div><div class="wc-m-val" id="wc-ar">¥0</div></div>
+      <div class="wc-m"><div class="wc-m-lbl">棚卸資産（INV）</div><div class="wc-m-val" id="wc-inv">¥0</div></div>
+      <div class="wc-m"><div class="wc-m-lbl">買掛金（AP）</div><div class="wc-m-val" id="wc-ap">¥0</div></div>
+      <div class="wc-m"><div class="wc-m-lbl">DSO 売掛回転日数</div><div class="wc-m-val" id="wc-dso">—</div></div>
+      <div class="wc-m"><div class="wc-m-lbl">DPO 買掛回転日数</div><div class="wc-m-val" id="wc-dpo">—</div></div>
+      <div class="wc-m"><div class="wc-m-lbl">DIO 在庫回転日数</div><div class="wc-m-val" id="wc-dio">—</div></div>
+      <div class="wc-m"><div class="wc-m-lbl">CCC 現金循環日数</div><div class="wc-m-val" id="wc-ccc">—</div></div>
+    </div>
+    <div class="wc-params">
+      <label>目標DSO <input type="number" id="tgt-dso" value="30" min="1" max="365"></label>
+      <label>目標DPO <input type="number" id="tgt-dpo" value="45" min="1" max="365"></label>
+      <label>目標DIO <input type="number" id="tgt-dio" value="60" min="1" max="365"></label>
+    </div>
+  </div>
+
+  <div class="eq-struct">
+    <h4>資本構成 — 自己資本 vs 負債</h4>
+    <div class="eq-bar-track"><div class="eq-bar-fill" id="eq-bar-fill" style="width:100%"></div></div>
+    <div class="eq-labels">
+      <span id="eq-lbl-e">自己資本 ¥10,000 (100%)</span>
+      <span id="eq-lbl-d">負債 ¥0 (0%)</span>
+    </div>
+  </div>
+
+  <div class="log-section">
+    <div class="log-head">
+      <span class="log-title">取引ログ</span>
+      <button class="btn-clear" onclick="clearLog()">消去</button>
+    </div>
+    <div class="log-list" id="log-list">（取引はここに記録されます）</div>
+  </div>
+
+</div><!-- /main -->
+</div><!-- /app-body -->
+
+<script src="app.js"></script>
+</body>
+</html>
