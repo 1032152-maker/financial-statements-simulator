@@ -1,0 +1,1052 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=1280">
+<title>コーポレートファイナンス — WACC / DCF / M&A</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
+<style>
+/* ─────────────────────────────
+   TOKENS
+───────────────────────────── */
+:root{
+  --bg:#f2f5f8;--bg2:#eaeff4;--bg3:#dfe7ef;
+  --surface:#fff;--surface2:#f7f9fc;
+  --border:#dce4ed;--border2:#ccd5e0;
+  --text:#1a2535;--text2:#4a5b6e;--text3:#8fa2b4;
+  --sage:#3e7068;--navy:#2a4a7c;--umber:#7a5230;
+  --up:#1a5c3a;--down:#8b2020;
+  --shadow:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.05);
+  --shadow2:0 4px 20px rgba(0,0,0,.12);
+  --radius:8px;--radius2:12px;
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh;}
+
+/* ─────────────────────────────
+   TOP NAV
+───────────────────────────── */
+.topnav{
+  background:var(--surface);border-bottom:1px solid var(--border);
+  padding:0 20px;height:44px;position:sticky;top:0;z-index:200;
+  box-shadow:var(--shadow);display:flex;align-items:center;gap:0;
+}
+.nav-brand{
+  font-size:14px;font-weight:700;color:var(--sage);
+  display:flex;align-items:center;gap:6px;
+  padding-right:18px;border-right:1px solid var(--border);
+  margin-right:10px;white-space:nowrap;
+}
+.nav-brand svg{width:16px;height:16px;stroke-width:2;}
+.nav-link{
+  display:flex;align-items:center;gap:5px;
+  padding:0 14px;height:44px;font-size:12px;font-weight:500;
+  color:var(--text3);text-decoration:none;white-space:nowrap;
+  border-bottom:2px solid transparent;transition:color .15s;
+}
+.nav-link:hover{color:var(--text2);}
+.nav-link.active{color:var(--navy);border-bottom-color:var(--navy);font-weight:700;}
+.nav-link svg{width:13px;height:13px;stroke-width:2;opacity:.8;}
+
+/* ─────────────────────────────
+   PAGE HEADER
+───────────────────────────── */
+.page-header{
+  background:var(--navy);
+  color:#fff;padding:20px 20px 0;
+}
+.page-header-inner{max-width:1120px;margin:0 auto;}
+.page-header h1{font-size:17px;font-weight:700;margin-bottom:3px;}
+.page-header p{font-size:11.5px;opacity:.7;line-height:1.6;margin-bottom:16px;}
+
+/* In-page tabs */
+.page-tabs{
+  display:flex;gap:0;border-bottom:none;
+  margin-top:4px;
+}
+.page-tab{
+  padding:10px 18px;font-size:12px;font-weight:600;
+  color:rgba(255,255,255,.5);background:transparent;border:none;
+  border-bottom:3px solid transparent;cursor:pointer;
+  font-family:'Noto Sans JP',sans-serif;
+  transition:all .15s;white-space:nowrap;
+  display:flex;align-items:center;gap:5px;
+}
+.page-tab svg{width:13px;height:13px;stroke-width:2;}
+.page-tab:hover{color:rgba(255,255,255,.8);}
+.page-tab.active{color:#fff;border-bottom-color:#fff;}
+
+/* ─────────────────────────────
+   LAYOUT
+───────────────────────────── */
+.page-body{max-width:1120px;margin:0 auto;padding:20px 20px 48px;}
+.tab-panel{display:none;}
+.tab-panel.active{display:block;}
+
+/* ─────────────────────────────
+   SECTIONS
+───────────────────────────── */
+.section{
+  background:var(--surface);border:1px solid var(--border);
+  border-radius:var(--radius2);overflow:hidden;
+  box-shadow:var(--shadow);margin-bottom:16px;
+}
+.section-head{
+  padding:11px 16px;border-bottom:1px solid var(--border);
+  background:var(--bg2);
+  display:flex;align-items:center;gap:7px;flex-wrap:wrap;
+}
+.section-head h2{font-size:13px;font-weight:700;color:var(--text);flex:1;}
+.sh-tag{
+  font-size:9px;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  background:var(--navy);color:#fff;border-radius:3px;padding:2px 7px;
+}
+.sh-tag.sage{background:var(--sage);}
+.sh-tag.umber{background:var(--umber);}
+.section-head svg{width:15px;height:15px;color:var(--navy);stroke-width:2;flex-shrink:0;}
+.section-body{padding:16px 20px;}
+
+/* ─────────────────────────────
+   INPUTS
+───────────────────────────── */
+.input-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;margin-bottom:14px;}
+.ig3{grid-template-columns:repeat(3,1fr);}
+.ig4{grid-template-columns:repeat(4,1fr);}
+.input-group{display:flex;flex-direction:column;gap:4px;}
+.lbl{font-size:10px;font-weight:700;color:var(--text3);letter-spacing:.06em;text-transform:uppercase;}
+.lbl-sub{font-size:9.5px;color:var(--text3);margin-top:-2px;}
+.input-row{display:flex;align-items:center;}
+.input-row input{
+  flex:1;padding:8px 10px;
+  border:1.5px solid var(--border);border-radius:6px 0 0 6px;
+  background:var(--surface2);color:var(--text);
+  font-size:14px;font-family:'JetBrains Mono',monospace;font-weight:500;
+  outline:none;transition:border-color .15s;-webkit-appearance:none;
+}
+.input-row input:hover{border-color:var(--border2);}
+.input-row input:focus{border-color:var(--navy);}
+.unit{
+  padding:8px 10px;background:var(--bg3);
+  border:1.5px solid var(--border);border-left:none;
+  border-radius:0 6px 6px 0;
+  font-size:11px;color:var(--text3);font-weight:600;white-space:nowrap;
+}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:4px;
+  background:var(--bg3);border-radius:2px;outline:none;
+  cursor:pointer;margin-top:6px;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:16px;height:16px;
+  border-radius:50%;background:var(--navy);cursor:pointer;
+  box-shadow:0 1px 4px rgba(0,0,0,.2);transition:transform .1s;
+}
+input[type=range]::-webkit-slider-thumb:hover{transform:scale(1.15);}
+
+/* ─────────────────────────────
+   BUTTONS
+───────────────────────────── */
+.calc-btn{
+  display:inline-flex;align-items:center;gap:7px;
+  background:var(--navy);color:#fff;border:none;
+  padding:10px 22px;border-radius:7px;
+  font-size:13px;font-weight:700;font-family:'Noto Sans JP',sans-serif;
+  cursor:pointer;transition:background .15s,transform .1s;
+  box-shadow:0 2px 8px rgba(42,74,124,.3);
+}
+.calc-btn:hover{background:#1e3a6a;transform:translateY(-1px);}
+.calc-btn:active{transform:translateY(0);}
+.calc-btn svg{width:15px;height:15px;stroke-width:2.2;}
+.calc-btn.sage{background:var(--sage);box-shadow:0 2px 8px rgba(62,112,104,.3);}
+.calc-btn.sage:hover{background:#2c5550;}
+.calc-btn.umber{background:var(--umber);box-shadow:0 2px 8px rgba(122,82,48,.3);}
+.calc-btn.umber:hover{background:#5e3e22;}
+
+/* ─────────────────────────────
+   RESULT CARDS
+───────────────────────────── */
+.result-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(170px,1fr));gap:9px;margin-top:14px;}
+.rc{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:11px 13px;
+  transition:border-color .15s;
+}
+.rc:hover{border-color:var(--border2);}
+.rc.hl{background:rgba(42,74,124,.07);border-color:var(--navy);}
+.rc.hl-sage{background:rgba(62,112,104,.07);border-color:var(--sage);}
+.rc.hl-umber{background:rgba(122,82,48,.07);border-color:var(--umber);}
+.rc-lbl{font-size:9.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.rc-val{font-size:20px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--text);}
+.rc-val.pos{color:var(--up);}
+.rc-val.neg{color:var(--down);}
+.rc-val.navy{color:var(--navy);}
+.rc-val.sage{color:var(--sage);}
+.rc-sub{font-size:10px;color:var(--text3);margin-top:3px;}
+
+/* ─────────────────────────────
+   TABLES
+───────────────────────────── */
+.tbl-wrap{overflow-x:auto;margin-top:10px;}
+table.data-tbl{
+  width:100%;border-collapse:collapse;font-size:11.5px;min-width:480px;
+}
+table.data-tbl th{
+  background:var(--navy);color:#fff;padding:7px 10px;
+  font-size:9.5px;font-weight:700;letter-spacing:.04em;text-align:center;
+}
+table.data-tbl th:first-child{text-align:left;}
+table.data-tbl td{
+  padding:6px 10px;border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:11px;text-align:right;
+}
+table.data-tbl td:first-child{
+  text-align:left;font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--text2);
+}
+table.data-tbl tr.tr-total td{font-weight:700;background:var(--bg3);}
+table.data-tbl tr.tr-pv td{font-weight:700;background:rgba(42,74,124,.06);color:var(--navy);}
+table.data-tbl tr.tr-sub td{color:var(--text3);}
+.pv{color:var(--up);}.nv{color:var(--down);}
+
+/* Sensitivity */
+table.sens-tbl{width:100%;border-collapse:collapse;font-size:11px;min-width:380px;}
+table.sens-tbl th{padding:6px 8px;font-size:9.5px;font-weight:700;background:var(--bg3);color:var(--text2);text-align:center;}
+table.sens-tbl td{padding:5px 8px;border:1px solid var(--border);font-family:'JetBrains Mono',monospace;text-align:center;}
+table.sens-tbl td.ax{font-family:'Noto Sans JP',sans-serif;font-size:9.5px;font-weight:700;background:var(--bg2);color:var(--text2);}
+table.sens-tbl td.sc{background:rgba(42,74,124,.12);font-weight:700;color:var(--navy);}
+table.sens-tbl td.hi{background:rgba(26,92,58,.10);color:var(--up);font-weight:600;}
+table.sens-tbl td.lo{background:rgba(139,32,32,.08);color:var(--down);font-weight:600;}
+
+/* ─────────────────────────────
+   WACC BREAKDOWN
+───────────────────────────── */
+.wacc-bar{
+  display:flex;align-items:center;gap:6px;flex-wrap:wrap;
+  padding:12px 14px;background:var(--bg2);
+  border:1px solid var(--border);border-radius:var(--radius);margin-top:12px;
+}
+.wb{
+  flex:1;min-width:86px;background:var(--surface);
+  border:1px solid var(--border);border-radius:6px;
+  padding:8px 10px;text-align:center;
+}
+.wb.hl{border-color:var(--navy);background:rgba(42,74,124,.06);}
+.wb-lbl{font-size:8.5px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin-bottom:2px;}
+.wb-val{font-size:15px;font-weight:700;font-family:'JetBrains Mono',monospace;color:var(--navy);}
+.wb-op{font-size:16px;color:var(--text3);flex-shrink:0;font-weight:300;}
+
+/* ─────────────────────────────
+   EV BRIDGE
+───────────────────────────── */
+.ev-bridge{border:1px solid var(--border);border-radius:var(--radius);overflow:hidden;margin-top:10px;}
+.evr{
+  display:flex;justify-content:space-between;align-items:center;
+  padding:8px 14px;border-bottom:1px solid var(--border);font-size:12.5px;
+}
+.evr:last-child{border-bottom:none;}
+.evr.evr-total{background:rgba(42,74,124,.07);font-weight:700;}
+.evr.evr-pos .evr-val{color:var(--up);}
+.evr.evr-neg .evr-val{color:var(--down);}
+.evr-lbl{color:var(--text2);}
+.evr-val{font-family:'JetBrains Mono',monospace;font-weight:600;}
+
+/* ─────────────────────────────
+   INSIGHT
+───────────────────────────── */
+.insight{
+  background:rgba(42,74,124,.05);border:1px solid rgba(42,74,124,.18);
+  border-radius:var(--radius);padding:10px 13px;margin-top:10px;
+}
+.insight.sage{background:rgba(62,112,104,.05);border-color:rgba(62,112,104,.2);}
+.insight.umber{background:rgba(122,82,48,.05);border-color:rgba(122,82,48,.2);}
+.insight-ttl{font-size:9.5px;font-weight:700;color:var(--navy);text-transform:uppercase;letter-spacing:.07em;margin-bottom:4px;}
+.insight.sage .insight-ttl{color:var(--sage);}
+.insight.umber .insight-ttl{color:var(--umber);}
+.insight-txt{font-size:12px;color:var(--text2);line-height:1.75;}
+.insight-txt b{color:var(--navy);}
+.insight.sage .insight-txt b{color:var(--sage);}
+.insight.umber .insight-txt b{color:var(--umber);}
+
+/* ─────────────────────────────
+   M&A TIMELINE
+───────────────────────────── */
+.ma-flow{display:flex;flex-direction:column;gap:0;margin-top:10px;}
+.ma-step{display:flex;gap:0;position:relative;}
+.ma-step::before{
+  content:'';position:absolute;left:18px;top:36px;bottom:0;
+  width:2px;background:var(--border2);
+}
+.ma-step:last-child::before{display:none;}
+.ma-dot{
+  width:36px;height:36px;border-radius:50%;flex-shrink:0;
+  display:flex;align-items:center;justify-content:center;
+  font-size:12px;font-weight:700;color:#fff;z-index:1;
+  margin-right:12px;margin-bottom:20px;
+}
+.ma-dot.d-navy{background:var(--navy);}
+.ma-dot.d-sage{background:var(--sage);}
+.ma-dot.d-umber{background:var(--umber);}
+.ma-dot.d-down{background:var(--down);}
+.ma-content{flex:1;padding-bottom:20px;}
+.ma-title{font-size:13px;font-weight:700;color:var(--text);margin-bottom:3px;}
+.ma-desc{font-size:12px;color:var(--text2);line-height:1.65;margin-bottom:6px;}
+.ma-chips{display:flex;gap:5px;flex-wrap:wrap;}
+.chip{
+  background:var(--bg2);border:1px solid var(--border);
+  border-radius:4px;padding:3px 8px;
+  font-size:10px;font-family:'JetBrains Mono',monospace;font-weight:600;color:var(--text2);
+}
+.chip.ok{background:rgba(26,92,58,.08);border-color:rgba(26,92,58,.3);color:var(--up);}
+.chip.ng{background:rgba(139,32,32,.08);border-color:rgba(139,32,32,.3);color:var(--down);}
+.chip.hl{background:rgba(42,74,124,.08);border-color:rgba(42,74,124,.25);color:var(--navy);}
+
+/* Goodwill impairment meter */
+.meter-wrap{margin-top:8px;}
+.meter-lbl{font-size:9.5px;color:var(--text3);font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-bottom:4px;}
+.meter-track{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;}
+.meter-fill{height:100%;border-radius:4px;transition:width .5s cubic-bezier(.4,0,.2,1);}
+.meter-fill.ok{background:var(--sage);}
+.meter-fill.warn{background:var(--umber);}
+.meter-fill.danger{background:var(--down);}
+.meter-labels{display:flex;justify-content:space-between;font-size:9px;color:var(--text3);margin-top:2px;}
+
+/* BS impact table */
+table.bs-impact{width:100%;border-collapse:collapse;font-size:12px;margin-top:10px;}
+table.bs-impact th{
+  background:var(--bg2);color:var(--text2);
+  padding:6px 10px;font-size:9.5px;font-weight:700;
+  text-transform:uppercase;letter-spacing:.06em;text-align:left;
+  border-bottom:1px solid var(--border);
+}
+table.bs-impact td{
+  padding:6px 10px;border-bottom:1px solid var(--border);
+  font-family:'JetBrains Mono',monospace;font-size:11.5px;
+}
+table.bs-impact td:first-child{font-family:'Noto Sans JP',sans-serif;font-size:12px;color:var(--text2);}
+table.bs-impact tr:last-child td{border-bottom:none;font-weight:700;background:var(--bg2);}
+.divider{height:1px;background:var(--border);margin:12px 0;}
+.placeholder{text-align:center;color:var(--text3);padding:20px;font-size:12px;}
+</style>
+</head>
+<body>
+
+<!-- ━━ TOP NAV ━━ -->
+<nav class="topnav">
+  <div class="nav-brand"><i data-lucide="bar-chart-3"></i>FinSim</div>
+  <a class="nav-link" href="index.html"><i data-lucide="table-2"></i>財務三表</a>
+  <a class="nav-link active" href="finance.html"><i data-lucide="trending-up"></i>コーポレートファイナンス</a>
+</nav>
+
+<!-- ━━ PAGE HEADER + TABS ━━ -->
+<div class="page-header">
+  <div class="page-header-inner">
+    <h1>コーポレートファイナンス シミュレーター</h1>
+    <p>WACC計算 → DCF企業価値 → M&Aシナリオの一連の流れを体感する。</p>
+    <div class="page-tabs" role="tablist">
+      <button class="page-tab active" onclick="switchTab('wacc')" id="ptab-wacc">
+        <i data-lucide="percent"></i>① WACC
+      </button>
+      <button class="page-tab" onclick="switchTab('dcf')" id="ptab-dcf">
+        <i data-lucide="activity"></i>② DCF・企業価値
+      </button>
+      <button class="page-tab" onclick="switchTab('ma')" id="ptab-ma">
+        <i data-lucide="git-merge"></i>③ M&Aシナリオ
+      </button>
+    </div>
+  </div>
+</div>
+
+<div class="page-body">
+
+<!-- ══════════════════════════════════
+     TAB 1: WACC
+══════════════════════════════════ -->
+<div class="tab-panel active" id="panel-wacc">
+
+  <!-- CAPM -->
+  <div class="section">
+    <div class="section-head">
+      <i data-lucide="percent" style="color:var(--navy)"></i>
+      <h2>株主資本コスト（Ke）— CAPM</h2>
+      <span class="sh-tag">CAPM</span>
+    </div>
+    <div class="section-body">
+      <div class="input-grid ig4">
+        <div class="input-group">
+          <div class="lbl">リスクフリーレート（Rf）</div>
+          <div class="lbl-sub">10年国債利回り / 日本：約1.0%</div>
+          <div class="input-row"><input type="number" id="rf" value="1.0" step="0.1" min="0" max="10"><div class="unit">%</div></div>
+          <input type="range" id="rf-r" min="0" max="5" step="0.1" value="1.0" oninput="sync('rf','rf-r');calcWACC();">
+        </div>
+        <div class="input-group">
+          <div class="lbl">市場リスクプレミアム（Rm−Rf）</div>
+          <div class="lbl-sub">日本株 過去平均 約5〜7%</div>
+          <div class="input-row"><input type="number" id="mrp" value="6.0" step="0.1" min="0" max="15"><div class="unit">%</div></div>
+          <input type="range" id="mrp-r" min="2" max="12" step="0.5" value="6.0" oninput="sync('mrp','mrp-r');calcWACC();">
+        </div>
+        <div class="input-group">
+          <div class="lbl">ベータ（β）</div>
+          <div class="lbl-sub">市場感応度 / 無リスク=0、市場=1.0</div>
+          <div class="input-row"><input type="number" id="beta" value="1.2" step="0.05" min="0.1" max="3"><div class="unit">x</div></div>
+          <input type="range" id="beta-r" min="0.1" max="2.5" step="0.05" value="1.2" oninput="sync('beta','beta-r');calcWACC();">
+        </div>
+        <div class="input-group">
+          <div class="lbl">サイズプレミアム / 個別リスク</div>
+          <div class="lbl-sub">中小企業・カントリーリスク等の加算</div>
+          <div class="input-row"><input type="number" id="size-prem" value="0" step="0.5" min="0" max="10"><div class="unit">%</div></div>
+        </div>
+      </div>
+      <div class="result-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="rc"><div class="rc-lbl">Rf（リスクフリー）</div><div class="rc-val" id="cr-rf">—</div></div>
+        <div class="rc"><div class="rc-lbl">β × (Rm−Rf)</div><div class="rc-val" id="cr-beta-mrp">—</div></div>
+        <div class="rc hl"><div class="rc-lbl">Ke（株主資本コスト）</div><div class="rc-val navy" id="cr-ke">—</div></div>
+      </div>
+      <div class="insight">
+        <div class="insight-ttl">CAPM とは</div>
+        <div class="insight-txt">
+          <b>Ke = Rf + β×(Rm−Rf)</b>。ベータが高いほど市場と連動しやすく、リスクが高いと見なされ株主が要求するリターンが上がります。
+          日本の成熟企業で β≈0.8〜1.2、ベンチャー系で β≈1.5〜2.5 程度が目安です。
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- WACC 計算 -->
+  <div class="section">
+    <div class="section-head">
+      <i data-lucide="sliders" style="color:var(--navy)"></i>
+      <h2>WACC（加重平均資本コスト）</h2>
+      <span class="sh-tag">WACC</span>
+    </div>
+    <div class="section-body">
+      <div class="input-grid ig4">
+        <div class="input-group">
+          <div class="lbl">負債コスト・税引前（Kd）</div>
+          <div class="lbl-sub">借入金利・社債利回りの加重平均</div>
+          <div class="input-row"><input type="number" id="kd" value="2.5" step="0.1" min="0" max="15"><div class="unit">%</div></div>
+          <input type="range" id="kd-r" min="0.5" max="10" step="0.5" value="2.5" oninput="sync('kd','kd-r');calcWACC();">
+        </div>
+        <div class="input-group">
+          <div class="lbl">実効税率（T）</div>
+          <div class="lbl-sub">法人税×(1−T) が節税効果を反映</div>
+          <div class="input-row"><input type="number" id="taxrate" value="30" step="1" min="0" max="50"><div class="unit">%</div></div>
+          <input type="range" id="tax-r" min="10" max="45" step="1" value="30" oninput="sync('taxrate','tax-r');calcWACC();">
+        </div>
+        <div class="input-group">
+          <div class="lbl">自己資本比率（E/V）</div>
+          <div class="lbl-sub">時価ベースの資本構成比率</div>
+          <div class="input-row"><input type="number" id="ev-ratio" value="65" step="1" min="1" max="100"><div class="unit">%</div></div>
+          <input type="range" id="ev-r" min="10" max="100" step="1" value="65" oninput="sync('ev-ratio','ev-r');calcWACC();">
+        </div>
+        <div class="input-group" style="justify-content:flex-end;align-self:flex-end;">
+          <button class="calc-btn" onclick="calcWACC()"><i data-lucide="calculator"></i>計算</button>
+        </div>
+      </div>
+
+      <div class="wacc-bar" id="wacc-bar">
+        <div class="wb"><div class="wb-lbl">Ke × E/V</div><div class="wb-val" id="wb-e">—</div></div>
+        <div class="wb-op">+</div>
+        <div class="wb"><div class="wb-lbl">Kd×(1−T) × D/V</div><div class="wb-val" id="wb-d">—</div></div>
+        <div class="wb-op">=</div>
+        <div class="wb hl"><div class="wb-lbl">WACC</div><div class="wb-val" id="wb-wacc" style="font-size:22px">—</div></div>
+      </div>
+
+      <div class="result-grid" style="margin-top:10px;grid-template-columns:repeat(4,1fr)">
+        <div class="rc"><div class="rc-lbl">Ke（株主資本コスト）</div><div class="rc-val navy" id="wr-ke">—</div></div>
+        <div class="rc"><div class="rc-lbl">Kd 税後（負債コスト）</div><div class="rc-val" id="wr-kd-at">—</div></div>
+        <div class="rc"><div class="rc-lbl">D/V（負債比率）</div><div class="rc-val" id="wr-dv">—</div></div>
+        <div class="rc hl"><div class="rc-lbl">WACC</div><div class="rc-val navy" id="wr-wacc">—</div></div>
+      </div>
+
+      <div class="insight">
+        <div class="insight-ttl">WACCの意味と使い方</div>
+        <div class="insight-txt">
+          WACCは「資金調達のコスト」であり、投資のハードルレートです。
+          <b>ROIC &gt; WACC なら企業価値を創造</b>し、ROIC &lt; WACC なら価値を毀損します。
+          負債には<b>節税効果（タックスシールド）</b>があるため、適度な借入はWACCを引き下げます。
+          ただし過剰な借入は財務リスクを高め、Ke・Kdの上昇を招きます。
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-wacc -->
+
+<!-- ══════════════════════════════════
+     TAB 2: DCF
+══════════════════════════════════ -->
+<div class="tab-panel" id="panel-dcf">
+
+  <!-- FCF入力 -->
+  <div class="section">
+    <div class="section-head">
+      <i data-lucide="activity" style="color:var(--navy)"></i>
+      <h2>FCF予測・DCF計算</h2>
+      <span class="sh-tag">DCF</span>
+    </div>
+    <div class="section-body">
+      <div class="insight">
+        <div class="insight-ttl">WACCを①タブで設定してから計算してください</div>
+        <div class="insight-txt">①タブで設定したWACCが割引率として自動で引き継がれます。</div>
+      </div>
+
+      <div class="divider"></div>
+
+      <div class="input-grid ig4" style="margin-top:4px">
+        <div class="input-group">
+          <div class="lbl">ベースFCF（初年度）</div>
+          <div class="lbl-sub">EBIT×(1−T) + 減価償却 − CapEx − ΔWC</div>
+          <div class="input-row"><input type="number" id="base-fcf" value="100" step="10" min="-9999" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">FCF成長率（1〜5年）</div>
+          <div class="lbl-sub">予測期間の年次成長率</div>
+          <div class="input-row"><input type="number" id="fcf-g" value="8" step="0.5" min="-20" max="50"><div class="unit">%</div></div>
+          <input type="range" id="fcfg-r" min="-10" max="30" step="0.5" value="8" oninput="sync('fcf-g','fcfg-r')">
+        </div>
+        <div class="input-group">
+          <div class="lbl">ターミナル成長率（g）</div>
+          <div class="lbl-sub">5年以降の永続成長率（≈ 名目GDP成長率）</div>
+          <div class="input-row"><input type="number" id="tg" value="2.0" step="0.1" min="-2" max="6"><div class="unit">%</div></div>
+          <input type="range" id="tg-r" min="-2" max="6" step="0.1" value="2.0" oninput="sync('tg','tg-r')">
+        </div>
+        <div class="input-group">
+          <div class="lbl">ネットデット</div>
+          <div class="lbl-sub">有利子負債 − 現金 / EV→株式価値の変換</div>
+          <div class="input-row"><input type="number" id="net-debt" value="200" step="10" min="-9999" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">発行済株式数</div>
+          <div class="lbl-sub">1株当たり価値の算出に使用</div>
+          <div class="input-row"><input type="number" id="shares" value="10" step="1" min="1" max="9999"><div class="unit">百万株</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">EBITDA（比較用）</div>
+          <div class="lbl-sub">マルチプル法クロスチェック用</div>
+          <div class="input-row"><input type="number" id="ebitda" value="80" step="5" min="0" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">業界EV/EBITDA（中央）</div>
+          <div class="lbl-sub">同業他社マルチプルの中央値</div>
+          <div class="input-row"><input type="number" id="ev-mult" value="9" step="0.5" min="1" max="50"><div class="unit">x</div></div>
+        </div>
+        <div class="input-group" style="justify-content:flex-end;align-self:flex-end;">
+          <button class="calc-btn" onclick="calcDCF()"><i data-lucide="calculator"></i>DCF計算</button>
+        </div>
+      </div>
+
+      <!-- FCF Table -->
+      <div class="tbl-wrap">
+        <table class="data-tbl" id="fcf-table">
+          <thead>
+            <tr>
+              <th style="text-align:left">項目</th>
+              <th>1年目</th><th>2年目</th><th>3年目</th><th>4年目</th><th>5年目</th><th>TV（永続）</th>
+            </tr>
+          </thead>
+          <tbody id="fcf-tbody">
+            <tr><td colspan="7" class="placeholder">「DCF計算」を押してください</td></tr>
+          </tbody>
+        </table>
+      </div>
+
+      <!-- Results -->
+      <div id="dcf-result-block" style="display:none">
+        <div class="result-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="rc hl"><div class="rc-lbl">EV（企業価値）</div><div class="rc-val navy" id="r-ev">—</div><div class="rc-sub">PV合計 + TV現在価値</div></div>
+          <div class="rc hl"><div class="rc-lbl">株式価値</div><div class="rc-val navy" id="r-eq">—</div><div class="rc-sub">EV − ネットデット</div></div>
+          <div class="rc"><div class="rc-lbl">1株当たり価値（DCF）</div><div class="rc-val" id="r-ps">—</div><div class="rc-sub"></div></div>
+          <div class="rc"><div class="rc-lbl">FCF累計現在価値</div><div class="rc-val" id="r-pv-fcf">—</div><div class="rc-sub">1〜5年目</div></div>
+          <div class="rc"><div class="rc-lbl">TV現在価値</div><div class="rc-val" id="r-pv-tv">—</div><div class="rc-sub">全体の <span id="r-tv-pct">—</span></div></div>
+          <div class="rc"><div class="rc-lbl">FCF Yield（初年度）</div><div class="rc-val" id="r-yield">—</div><div class="rc-sub">FCF ÷ EV</div></div>
+        </div>
+
+        <!-- EV Bridge -->
+        <div class="divider"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">EV → 株式価値 ブリッジ</div>
+        <div class="ev-bridge">
+          <div class="evr"><span class="evr-lbl">企業価値（EV）</span><span class="evr-val" id="br-ev">—</span></div>
+          <div class="evr evr-neg"><span class="evr-lbl">（−） 有利子負債</span><span class="evr-val" id="br-debt">—</span></div>
+          <div class="evr evr-pos"><span class="evr-lbl">（+） 現金・現金同等物</span><span class="evr-val" id="br-cash">—</span></div>
+          <div class="evr evr-total"><span class="evr-lbl">株式価値</span><span class="evr-val" id="br-eq">—</span></div>
+        </div>
+
+        <!-- マルチプル比較 -->
+        <div class="divider"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:8px">EV/EBITDA マルチプル法との比較</div>
+        <div class="result-grid" style="grid-template-columns:repeat(3,1fr)">
+          <div class="rc"><div class="rc-lbl">マルチプル法 EV</div><div class="rc-val" id="m-ev">—</div><div class="rc-sub" id="m-ev-sub">—</div></div>
+          <div class="rc"><div class="rc-lbl">DCF との乖離</div><div class="rc-val" id="m-gap">—</div><div class="rc-sub">マルチプル − DCF EV</div></div>
+          <div class="rc"><div class="rc-lbl">乖離率</div><div class="rc-val" id="m-gap-pct">—</div><div class="rc-sub">DCF を基準</div></div>
+        </div>
+
+        <!-- Sensitivity -->
+        <div class="divider"></div>
+        <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:6px">感応度分析 — WACC × ターミナル成長率（EV 百万円）</div>
+        <div class="tbl-wrap">
+          <table class="sens-tbl" id="sens-table"></table>
+        </div>
+
+        <div class="insight" style="margin-top:10px">
+          <div class="insight-ttl">DCFを読むときの3つのポイント</div>
+          <div class="insight-txt">
+            ① <b>TVへの依存度が高い</b>ほどモデルの不確実性が上がります（通常60〜80%を占める）。
+            ② <b>WACCを1%動かすと</b>EVが大きく変わることを感応度表で確認してください。
+            ③ マルチプル法との乖離が<b>±30%以上</b>なら、前提の再検討が必要です。
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /panel-dcf -->
+
+<!-- ══════════════════════════════════
+     TAB 3: M&A シナリオ
+══════════════════════════════════ -->
+<div class="tab-panel" id="panel-ma">
+
+  <!-- インプット -->
+  <div class="section">
+    <div class="section-head">
+      <i data-lucide="git-merge" style="color:var(--umber)"></i>
+      <h2>M&A インプット — 買収条件の設定</h2>
+      <span class="sh-tag umber">M&A</span>
+    </div>
+    <div class="section-body">
+      <div class="input-grid ig4">
+        <div class="input-group">
+          <div class="lbl">被買収企業の純資産（公正価値）</div>
+          <div class="lbl-sub">パーチェス法における識別可能純資産</div>
+          <div class="input-row"><input type="number" id="ma-nav" value="500" step="10" min="0" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">買収対価（支払金額）</div>
+          <div class="lbl-sub">総買収金額 / 現金・株式等の合計</div>
+          <div class="input-row"><input type="number" id="ma-price" value="800" step="10" min="0" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">のれん償却期間（日本基準）</div>
+          <div class="lbl-sub">最長20年 / IFRSは非償却</div>
+          <div class="input-row"><input type="number" id="ma-amort" value="10" step="1" min="1" max="20"><div class="unit">年</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">被買収企業のEBITDA</div>
+          <div class="lbl-sub">のれんのEV/EBITDA換算に使用</div>
+          <div class="input-row"><input type="number" id="ma-ebitda" value="60" step="5" min="0" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">想定シナジー効果（年間）</div>
+          <div class="lbl-sub">コスト削減 + クロスセルの合計</div>
+          <div class="input-row"><input type="number" id="ma-synergy" value="30" step="5" min="0" max="9999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">統合コスト（初年度一時費用）</div>
+          <div class="lbl-sub">システム統合・早期退職・リストラ費用</div>
+          <div class="input-row"><input type="number" id="ma-integ" value="50" step="5" min="0" max="9999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group">
+          <div class="lbl">減損テスト基準（回収可能額）</div>
+          <div class="lbl-sub">使用価値 or 売却見込額の高い方</div>
+          <div class="input-row"><input type="number" id="ma-recoverable" value="650" step="10" min="0" max="99999"><div class="unit">百万円</div></div>
+        </div>
+        <div class="input-group" style="justify-content:flex-end;align-self:flex-end;">
+          <button class="calc-btn umber" onclick="calcMA()"><i data-lucide="calculator"></i>シナリオ計算</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- シナリオ結果 -->
+  <div class="section" id="ma-result-section" style="display:none">
+    <div class="section-head">
+      <i data-lucide="layers" style="color:var(--umber)"></i>
+      <h2>M&A シナリオ — 一連の会計処理</h2>
+      <span class="sh-tag umber">シナリオ</span>
+    </div>
+    <div class="section-body">
+
+      <div class="ma-flow" id="ma-flow"></div>
+
+      <div class="divider"></div>
+
+      <!-- BS影響サマリー -->
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">買収直後のBS変化サマリー</div>
+      <table class="bs-impact" id="ma-bs-table"></table>
+
+      <!-- のれん減損メーター -->
+      <div class="divider"></div>
+      <div style="font-size:10px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.07em;margin-bottom:7px">のれん 減損リスクメーター</div>
+      <div class="meter-wrap">
+        <div class="meter-lbl">帳簿価額 vs 回収可能額</div>
+        <div class="meter-track"><div class="meter-fill" id="imp-meter-fill" style="width:0%"></div></div>
+        <div class="meter-labels"><span>回収可能額</span><span>帳簿価額</span></div>
+      </div>
+      <div id="imp-verdict" style="margin-top:8px;font-size:12px;font-weight:600;"></div>
+
+      <!-- 経済性サマリー -->
+      <div class="divider"></div>
+      <div class="result-grid" style="grid-template-columns:repeat(3,1fr)">
+        <div class="rc"><div class="rc-lbl">支払プレミアム</div><div class="rc-val" id="ma-premium">—</div><div class="rc-sub">買収対価 − 純資産</div></div>
+        <div class="rc hl-umber"><div class="rc-lbl">EV/EBITDA（買収倍率）</div><div class="rc-val" id="ma-mult">—</div><div class="rc-sub">買収対価 ÷ EBITDA</div></div>
+        <div class="rc"><div class="rc-lbl">のれん年間償却費</div><div class="rc-val" id="ma-amort-ann">—</div><div class="rc-sub">日本基準（均等償却）</div></div>
+        <div class="rc"><div class="rc-lbl">シナジー回収年数</div><div class="rc-val" id="ma-payback">—</div><div class="rc-sub">のれん ÷ 純シナジー</div></div>
+        <div class="rc"><div class="rc-lbl">初年度純シナジー</div><div class="rc-val" id="ma-net-syn">—</div><div class="rc-sub">シナジー − 統合コスト</div></div>
+        <div class="rc" id="ma-impairment-rc"><div class="rc-lbl">減損損失（計上の場合）</div><div class="rc-val" id="ma-impairment-val">—</div><div class="rc-sub">帳簿価額 − 回収可能額</div></div>
+      </div>
+
+      <div class="insight umber" style="margin-top:10px">
+        <div class="insight-ttl">実務でのM&A価値判断チェックリスト</div>
+        <div class="insight-txt" id="ma-insight-txt">—</div>
+      </div>
+
+    </div>
+  </div>
+
+</div><!-- /panel-ma -->
+
+</div><!-- /page-body -->
+
+<script>
+'use strict';
+
+/* ─────── UTILS ─────── */
+function fmtM(v){
+  if(!isFinite(v))return'—';
+  var s=v<0?'-':'';
+  var a=Math.abs(v);
+  return s+'¥'+a.toFixed(0)+'百万';
+}
+function fmtB(v){ // 億円
+  if(!isFinite(v))return'—';
+  return (v<0?'-':'')+'¥'+(Math.abs(v)/10000).toFixed(2)+'億';
+}
+function pct(v,d){return(v*100).toFixed(d||1)+'%';}
+function x(v){return v.toFixed(1)+'x';}
+
+/* ─────── TAB SWITCH ─────── */
+function switchTab(tab){
+  document.querySelectorAll('.tab-panel').forEach(function(p){p.classList.remove('active');});
+  document.querySelectorAll('.page-tab').forEach(function(b){b.classList.remove('active');});
+  document.getElementById('panel-'+tab).classList.add('active');
+  document.getElementById('ptab-'+tab).classList.add('active');
+}
+
+/* ─────── SYNC SLIDER ─────── */
+function sync(inputId,rangeId){
+  var r=document.getElementById(rangeId);
+  var i=document.getElementById(inputId);
+  i.value=r.value;
+}
+
+// Attach input listeners for all inputs that don't already have oninput
+['rf','mrp','beta','size-prem','kd','taxrate','ev-ratio'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el) el.addEventListener('input',calcWACC);
+});
+['fcf-g','tg'].forEach(function(id){
+  var el=document.getElementById(id);
+  if(el) el.addEventListener('input',function(){});
+});
+
+/* ─────── WACC ─────── */
+var lastWACC=null;
+function calcWACC(){
+  var rf=+document.getElementById('rf').value/100;
+  var mrp=+document.getElementById('mrp').value/100;
+  var beta=+document.getElementById('beta').value;
+  var sp=+document.getElementById('size-prem').value/100;
+  var kd=+document.getElementById('kd').value/100;
+  var t=+document.getElementById('taxrate').value/100;
+  var ev=+document.getElementById('ev-ratio').value/100;
+  var dv=1-ev;
+
+  var ke=rf+beta*mrp+sp;
+  var kdAt=kd*(1-t);
+  var wacc=ke*ev+kdAt*dv;
+  lastWACC=wacc;
+
+  // CAPM section
+  document.getElementById('cr-rf').textContent=pct(rf);
+  document.getElementById('cr-beta-mrp').textContent=pct(beta*mrp);
+  document.getElementById('cr-ke').textContent=pct(ke);
+  // WACC bar
+  document.getElementById('wb-e').textContent=pct(ke*ev);
+  document.getElementById('wb-d').textContent=pct(kdAt*dv);
+  document.getElementById('wb-wacc').textContent=pct(wacc);
+  // Result row
+  document.getElementById('wr-ke').textContent=pct(ke);
+  document.getElementById('wr-kd-at').textContent=pct(kdAt);
+  document.getElementById('wr-dv').textContent=pct(dv);
+  document.getElementById('wr-wacc').textContent=pct(wacc);
+
+  // sync range sliders
+  document.getElementById('rf-r').value=document.getElementById('rf').value;
+  document.getElementById('mrp-r').value=document.getElementById('mrp').value;
+  document.getElementById('beta-r').value=document.getElementById('beta').value;
+  document.getElementById('kd-r').value=document.getElementById('kd').value;
+  document.getElementById('tax-r').value=document.getElementById('taxrate').value;
+  document.getElementById('ev-r').value=document.getElementById('ev-ratio').value;
+
+  return wacc;
+}
+
+/* ─────── DCF ─────── */
+var lastDCF=null;
+function calcDCF(){
+  var wacc=calcWACC();
+  var baseFCF=+document.getElementById('base-fcf').value;
+  var g=+document.getElementById('fcf-g').value/100;
+  var tg=+document.getElementById('tg').value/100;
+  var nd=+document.getElementById('net-debt').value;
+  var sh=+document.getElementById('shares').value;
+  var ebitda=+document.getElementById('ebitda').value;
+  var mult=+document.getElementById('ev-mult').value;
+
+  if(wacc<=tg){alert('WACCはターミナル成長率より大きくなければなりません');return;}
+
+  var fcfs=[],pvs=[];
+  var totalPV=0;
+  for(var yr=1;yr<=5;yr++){
+    var fcf=baseFCF*Math.pow(1+g,yr);
+    var pv=fcf/Math.pow(1+wacc,yr);
+    fcfs.push(fcf);pvs.push(pv);totalPV+=pv;
+  }
+  var fcf6=baseFCF*Math.pow(1+g,5)*(1+tg);
+  var tv=fcf6/(wacc-tg);
+  var pvTV=tv/Math.pow(1+wacc,5);
+  var ev=totalPV+pvTV;
+  var equity=ev-nd;
+  var ps=equity/sh;
+  lastDCF={ev,equity,ps,totalPV,pvTV,tv,fcfs,pvs,wacc,tg,baseFCF,g,nd,sh};
+
+  // FCF table
+  var tb=document.getElementById('fcf-tbody');
+  var rows='';
+  rows+='<tr><td>FCF（予測）</td>';
+  fcfs.forEach(function(v){rows+='<td class="'+(v>=0?'pv':'nv')+'">'+fmtM(v)+'</td>';});
+  rows+='<td>—</td></tr>';
+  rows+='<tr class="tr-pv"><td>FCF 現在価値</td>';
+  pvs.forEach(function(v){rows+='<td>'+fmtM(v)+'</td>';});
+  rows+='<td>—</td></tr>';
+  rows+='<tr class="tr-total"><td>ターミナルバリュー（TV）</td><td colspan="5" style="text-align:center;color:var(--text3)">予測期間以降の永続価値</td><td>'+fmtM(tv)+'</td></tr>';
+  rows+='<tr class="tr-pv"><td>TV 現在価値</td><td>—</td><td>—</td><td>—</td><td>—</td><td>—</td><td>'+fmtM(pvTV)+'</td></tr>';
+  tb.innerHTML=rows;
+
+  // Results
+  document.getElementById('r-ev').textContent=fmtM(ev);
+  document.getElementById('r-eq').textContent=fmtM(equity);
+  document.getElementById('r-ps').textContent='¥'+ps.toFixed(0);
+  document.getElementById('r-pv-fcf').textContent=fmtM(totalPV);
+  document.getElementById('r-pv-tv').textContent=fmtM(pvTV);
+  document.getElementById('r-tv-pct').textContent=pct(pvTV/ev);
+  document.getElementById('r-yield').textContent=pct(baseFCF/ev);
+  document.getElementById('dcf-result-block').style.display='block';
+
+  // EV Bridge
+  document.getElementById('br-ev').textContent=fmtM(ev);
+  document.getElementById('br-debt').textContent=nd>0?fmtM(nd):'¥0百万';
+  document.getElementById('br-cash').textContent=nd<0?fmtM(-nd):'¥0百万';
+  document.getElementById('br-eq').textContent=fmtM(equity);
+
+  // Multiple comparison
+  var mEV=ebitda*mult;
+  var gap=mEV-ev;
+  document.getElementById('m-ev').textContent=fmtM(mEV);
+  document.getElementById('m-ev-sub').textContent='EBITDA×'+mult+'x';
+  var gapEl=document.getElementById('m-gap');
+  gapEl.textContent=fmtM(gap);
+  gapEl.className='rc-val'+(gap>0?' pos':gap<0?' neg':'');
+  var gapPctEl=document.getElementById('m-gap-pct');
+  gapPctEl.textContent=pct(gap/ev);
+  gapPctEl.className='rc-val'+(gap>0?' pos':gap<0?' neg':'');
+
+  // Sensitivity
+  buildSens(wacc,tg,baseFCF,g);
+}
+
+function buildSens(baseWACC,baseTG,baseFCF,g){
+  var wDs=[-0.02,-0.01,0,0.01,0.02];
+  var tDs=[-0.01,-0.005,0,0.005,0.01];
+  var html='<thead><tr><th rowspan="2" colspan="2">EV（百万円）</th><th colspan="5">ターミナル成長率</th></tr><tr>';
+  tDs.forEach(function(d){html+='<th>'+(baseTG*100+d*100).toFixed(1)+'%</th>';});
+  html+='</tr></thead><tbody>';
+  wDs.forEach(function(wd){
+    var w=baseWACC+wd;
+    html+='<tr>';
+    if(wd===wDs[0]) html+='<td class="ax" rowspan="5" style="writing-mode:vertical-rl;text-align:center">WACC</td>';
+    html+='<td class="ax">'+pct(w)+'</td>';
+    tDs.forEach(function(td){
+      var tg2=baseTG+td;
+      if(w<=tg2){html+='<td style="color:var(--text3);font-size:9px">N/A</td>';return;}
+      var pv=0;
+      for(var yr=1;yr<=5;yr++) pv+=baseFCF*Math.pow(1+g,yr)/Math.pow(1+w,yr);
+      var tv=baseFCF*Math.pow(1+g,5)*(1+tg2)/(w-tg2);
+      var ev2=pv+tv/Math.pow(1+w,5);
+      var isCenter=(wd===0&&td===0);
+      var cls=isCenter?'sc':ev2>lastDCF.ev?'hi':'lo';
+      html+='<td class="'+cls+'">'+ev2.toFixed(0)+'</td>';
+    });
+    html+='</tr>';
+  });
+  html+='</tbody>';
+  document.getElementById('sens-table').innerHTML=html;
+}
+
+/* ─────── M&A ─────── */
+function calcMA(){
+  var nav=+document.getElementById('ma-nav').value;
+  var price=+document.getElementById('ma-price').value;
+  var amortYrs=+document.getElementById('ma-amort').value;
+  var maEBITDA=+document.getElementById('ma-ebitda').value;
+  var synergy=+document.getElementById('ma-synergy').value;
+  var integ=+document.getElementById('ma-integ').value;
+  var recoverable=+document.getElementById('ma-recoverable').value;
+
+  var goodwill=price-nav;
+  var annAmort=goodwill/amortYrs;
+  var multPaid=maEBITDA>0?price/maEBITDA:0;
+  var netSyn1=synergy-integ; // 初年度純シナジー
+  var netSynSteady=synergy;  // 2年目以降
+  var payback=netSynSteady>0?goodwill/netSynSteady:Infinity;
+  var impairment=Math.max(0,price-recoverable);
+  var premium=goodwill;
+
+  // BS after acquisition
+  var bsRows=[
+    {lbl:'（+）識別可能純資産（公正価値）',val:nav,cls:'pv'},
+    {lbl:'（+）のれん（超過収益力）',val:goodwill,cls:'pv'},
+    {lbl:'（−）買収対価（現金流出）',val:-price,cls:'nv'},
+    {lbl:'取得後 純資産への純影響',val:0,cls:''},
+  ];
+
+  // Flow
+  var steps=[
+    {
+      dot:'d-navy',n:1,
+      title:'パーチェス法による買収の計上',
+      desc:'被買収企業の識別可能資産・負債を公正価値で計上し、買収対価との差額を「のれん」として計上します。',
+      chips:[
+        {label:'のれん: '+fmtM(goodwill),cl:goodwill>nav*0.5?'ng':'hl'},
+        {label:'買収倍率: '+x(multPaid),cl:multPaid>12?'ng':multPaid>8?'hl':'ok'},
+        {label:'純資産: '+fmtM(nav),cl:''}
+      ]
+    },
+    {
+      dot:'d-sage',n:2,
+      title:'日本基準：のれん均等償却（毎期）',
+      desc:'日本基準ではのれんを'+amortYrs+'年間にわたって均等償却します（最長20年）。'+
+           'IFRSは償却せず毎年減損テストを行います。',
+      chips:[
+        {label:'年間償却: '+fmtM(annAmort),cl:'hl'},
+        {label:'償却期間: '+amortYrs+'年',cl:''},
+        {label:'IFRS: 非償却・減損テスト',cl:''}
+      ]
+    },
+    {
+      dot:'d-sage',n:3,
+      title:'シナジー効果の実現',
+      desc:'コスト削減・クロスセルなどのシナジーが実現し始めます。初年度は統合コストが重なりネット効果が小さくなります。',
+      chips:[
+        {label:'初年度純シナジー: '+fmtM(netSyn1),cl:netSyn1>0?'ok':'ng'},
+        {label:'定常シナジー: '+fmtM(synergy)+'/年',cl:'ok'},
+        {label:'回収年数: '+(isFinite(payback)?payback.toFixed(1)+'年':'∞'),cl:payback<10?'ok':payback<20?'hl':'ng'}
+      ]
+    }
+  ];
+
+  if(impairment>0){
+    steps.push({
+      dot:'d-down',n:4,
+      title:'のれん減損テスト → 減損損失計上',
+      desc:'回収可能額（'+fmtM(recoverable)+'）が帳簿価額（'+fmtM(price)+'）を下回るため、差額を減損損失として計上します。'+
+           'PLに大きなマイナスが出ます。',
+      chips:[
+        {label:'減損損失: '+fmtM(impairment),cl:'ng'},
+        {label:'帳簿価額: '+fmtM(price),cl:''},
+        {label:'回収可能額: '+fmtM(recoverable),cl:'ok'}
+      ]
+    });
+  } else {
+    steps.push({
+      dot:'d-sage',n:4,
+      title:'減損テスト — 問題なし',
+      desc:'回収可能額（'+fmtM(recoverable)+'）が帳簿価額（'+fmtM(price)+'）を上回っているため、減損損失の計上は不要です。',
+      chips:[
+        {label:'減損: 不要',cl:'ok'},
+        {label:'余裕: '+fmtM(recoverable-price),cl:'ok'}
+      ]
+    });
+  }
+
+  // Render flow
+  var flowHtml='';
+  steps.forEach(function(s){
+    flowHtml+='<div class="ma-step">';
+    flowHtml+='<div class="ma-dot '+s.dot+'">'+s.n+'</div>';
+    flowHtml+='<div class="ma-content">';
+    flowHtml+='<div class="ma-title">'+s.title+'</div>';
+    flowHtml+='<div class="ma-desc">'+s.desc+'</div>';
+    flowHtml+='<div class="ma-chips">';
+    s.chips.forEach(function(c){
+      flowHtml+='<span class="chip'+(c.cl?' '+c.cl:'')+'">'+c.label+'</span>';
+    });
+    flowHtml+='</div></div></div>';
+  });
+  document.getElementById('ma-flow').innerHTML=flowHtml;
+
+  // BS table
+  var bsHtml='<tr><th>項目</th><th>金額</th><th>備考</th></tr>';
+  bsHtml+='<tr><td>識別可能純資産（公正価値）</td><td class="pv">+'+fmtM(nav)+'</td><td style="font-size:10.5px;color:var(--text3)">BS資産・負債を時価評価</td></tr>';
+  bsHtml+='<tr><td>のれん（超過収益力）</td><td class="pv">+'+fmtM(goodwill)+'</td><td style="font-size:10.5px;color:var(--text3)">買収対価 − 純資産</td></tr>';
+  bsHtml+='<tr><td>買収対価（現金支払）</td><td class="nv">−'+fmtM(price)+'</td><td style="font-size:10.5px;color:var(--text3)">現金・預金の減少</td></tr>';
+  bsHtml+='<tr><td>BS純影響（合計）</td><td>¥0</td><td style="font-size:10.5px;color:var(--text3)">取得原価 = 公正価値純資産 + のれん</td></tr>';
+  document.getElementById('ma-bs-table').innerHTML=bsHtml;
+
+  // Impairment meter
+  var ratio=Math.min(recoverable/price,1.2);
+  var pctFill=Math.min(ratio*100,100);
+  var meterFill=document.getElementById('imp-meter-fill');
+  meterFill.style.width=pctFill+'%';
+  meterFill.className='meter-fill '+(ratio>=1?'ok':ratio>=0.8?'warn':'danger');
+  var verdict=document.getElementById('imp-verdict');
+  if(impairment>0){
+    verdict.innerHTML='<span style="color:var(--down)">⚠ 減損損失 '+fmtM(impairment)+' の計上が必要です（回収可能額 < 帳簿価額）</span>';
+  } else {
+    verdict.innerHTML='<span style="color:var(--up)">✓ 減損不要（回収可能額が帳簿価額を '+fmtM(recoverable-price)+' 上回る）</span>';
+  }
+
+  // Summary results
+  document.getElementById('ma-premium').textContent=fmtM(premium);
+  document.getElementById('ma-premium').className='rc-val '+(premium/nav>0.5?'neg':'pos');
+  document.getElementById('ma-mult').textContent=x(multPaid);
+  document.getElementById('ma-amort-ann').textContent=fmtM(annAmort);
+  document.getElementById('ma-payback').textContent=isFinite(payback)?payback.toFixed(1)+'年':'—';
+  var nsEl=document.getElementById('ma-net-syn');
+  nsEl.textContent=fmtM(netSyn1);
+  nsEl.className='rc-val '+(netSyn1>0?'pos':'neg');
+  document.getElementById('ma-impairment-val').textContent=impairment>0?fmtM(impairment):'計上不要';
+  document.getElementById('ma-impairment-val').className='rc-val '+(impairment>0?'neg':'pos');
+  var impRc=document.getElementById('ma-impairment-rc');
+  impRc.className='rc '+(impairment>0?'':'hl-sage');
+
+  // Insight
+  var tips=[];
+  if(multPaid>12) tips.push('<b>買収倍率（'+x(multPaid)+'）が高め</b>です。シナジーが想定を下回ると減損リスクが高まります。');
+  if(payback>15) tips.push('<b>シナジー回収年数（'+payback.toFixed(1)+'年）</b>が長く、のれんの経済的正当性を問われる可能性があります。');
+  if(impairment>0) tips.push('<b>現時点で減損損失（'+fmtM(impairment)+'）</b>が計上されます。PLへの影響と自己資本比率の変化を確認してください。');
+  if(netSyn1<0) tips.push('初年度は統合コストでネットシナジーがマイナスです。<b>2年目以降の定常シナジー（'+fmtM(synergy)+'/年）</b>が実現するかが鍵です。');
+  if(tips.length===0) tips.push('買収条件は相対的に良好です。<b>シナジーの着実な実現</b>と毎年の減損テストの継続が重要です。');
+
+  document.getElementById('ma-insight-txt').innerHTML=tips.join('<br>');
+
+  document.getElementById('ma-result-section').style.display='block';
+  document.getElementById('ma-result-section').scrollIntoView({behavior:'smooth',block:'start'});
+}
+
+/* ─────── INIT ─────── */
+calcWACC();
+if(typeof lucide!=='undefined') lucide.createIcons();
+</script>
+</body>
+</html>

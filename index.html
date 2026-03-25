@@ -2,301 +2,388 @@
 <html lang="ja">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=1280">
 <title>財務三表 シミュレーター</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+JP:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 <style>
 :root {
-  --bg:#f2f5f8;
-  --bg2:#eaeff4;
-  --bg3:#dfe7ef;
-  --surface:#ffffff;
-  --surface2:#f7f9fc;
-  --border:#dce4ed;
-  --border2:#ccd5e0;
-  --text:#1a2535;
-  --text2:#4a5b6e;
-  --text3:#8fa2b4;
-  --sage:#3e7068;
-  --sage-dark:#2c5550;
-  --sage-light:#ebf3f0;
-  --navy:#2a4a7c;
-  --navy-light:#e8eef8;
-  --umber:#7a5230;
-  --up:#1a5c3a;
-  --down:#8b2020;
+  --bg:#f2f5f8; --bg2:#eaeff4; --bg3:#dfe7ef;
+  --surface:#ffffff; --surface2:#f7f9fc;
+  --border:#dce4ed; --border2:#ccd5e0;
+  --text:#1a2535; --text2:#4a5b6e; --text3:#8fa2b4;
+  --sage:#3e7068; --navy:#2a4a7c; --umber:#7a5230;
+  --up:#1a5c3a; --down:#8b2020;
   --shadow:0 1px 3px rgba(0,0,0,.05),0 2px 8px rgba(0,0,0,.05);
-  --shadow2:0 4px 20px rgba(0,0,0,.10);
-  --radius:8px;
-  --radius2:12px;
+  --shadow-up:0 -2px 20px rgba(0,0,0,.10);
+  --radius:8px; --radius2:12px;
 }
-*{box-sizing:border-box;margin:0;padding:0}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
 body{font-family:'Noto Sans JP',sans-serif;background:var(--bg);color:var(--text);font-size:13px;min-height:100vh;}
 
 /* ── HEADER ── */
-.header{
-  background:var(--surface);
-  border-bottom:1px solid var(--border);
-  padding:10px 18px;
-  position:sticky;top:0;z-index:100;
-  box-shadow:var(--shadow);
-}
+.header{background:var(--surface);border-bottom:1px solid var(--border);padding:10px 20px;position:sticky;top:44px;z-index:100;box-shadow:var(--shadow);}
 .header-top{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px;}
-.app-title{
-  font-size:14px;font-weight:700;
-  color:var(--sage);letter-spacing:.02em;
-  display:flex;align-items:center;gap:7px;
-}
+.app-title{font-size:15px;font-weight:700;color:var(--sage);letter-spacing:.02em;display:flex;align-items:center;gap:6px;}
 .app-title svg{width:17px;height:17px;stroke-width:2;}
-.btn-reset{
-  background:transparent;color:var(--text3);
-  border:1px solid var(--border);
-  padding:4px 11px;border-radius:5px;cursor:pointer;
-  font-size:11px;font-weight:500;
-  font-family:'Noto Sans JP',sans-serif;
-  display:flex;align-items:center;gap:5px;
-  transition:all .15s;
-}
-.btn-reset:hover{border-color:var(--text2);color:var(--text2);background:var(--bg2);}
-.btn-reset svg{width:12px;height:12px;}
-.kpi-row{display:flex;gap:6px;flex-wrap:wrap;}
-.kpi{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:6px;padding:5px 10px;min-width:95px;flex:1;
-}
+.btn-reset{background:transparent;color:var(--text3);border:1px solid var(--border);padding:5px 12px;border-radius:5px;cursor:pointer;font-size:11px;font-weight:500;font-family:'Noto Sans JP',sans-serif;display:flex;align-items:center;gap:4px;transition:all .15s;}
+.btn-reset:hover{background:var(--bg2);border-color:var(--border2);color:var(--text2);}
+.btn-reset svg{width:11px;height:11px;}
+.period-chip{background:var(--sage);color:#fff;border-radius:20px;padding:3px 12px;font-size:10px;font-weight:600;letter-spacing:.04em;}
+.kpi-row{display:flex;gap:8px;flex-wrap:wrap;}
+.kpi{background:var(--bg2);border:1px solid var(--border);border-radius:6px;padding:6px 12px;min-width:100px;flex:1;transition:border-color .15s;}
+.kpi:hover{border-color:var(--border2);}
 .kpi-label{font-size:9px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.07em;}
 .kpi-val{font-size:14px;font-weight:700;color:var(--text);font-family:'JetBrains Mono',monospace;margin-top:1px;}
 .kpi-val.pos{color:var(--up);}
 .kpi-val.neg{color:var(--down);}
-.period-chip{
-  background:var(--sage);color:#fff;
-  border-radius:20px;padding:2px 11px;
-  font-size:10px;font-weight:600;letter-spacing:.04em;
-}
 
 /* ── LAYOUT ── */
-.app-body{display:flex;min-height:calc(100vh - 108px);}
-
-/* ── SIDEBAR ── */
-.sidebar{
-  width:228px;min-width:208px;
-  background:var(--surface);border-right:1px solid var(--border);
-  padding:10px;overflow-y:auto;
-  max-height:calc(100vh - 108px);
-  position:sticky;top:108px;
-}
-.lv-select-label{
-  font-size:9px;font-weight:700;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.08em;
-  margin-bottom:4px;display:block;
-}
-.lv-select{
-  width:100%;padding:6px 28px 6px 9px;
-  border:1.5px solid var(--border);border-radius:6px;
-  background:var(--surface2);color:var(--text);
-  font-size:12px;font-family:'Noto Sans JP',sans-serif;font-weight:600;
-  cursor:pointer;appearance:none;-webkit-appearance:none;
-  background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fa2b4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");
-  background-repeat:no-repeat;background-position:right 9px center;
-  margin-bottom:7px;transition:border-color .15s;
-}
+.app-body{display:flex;min-height:calc(100vh - 120px);}
+.sidebar{width:260px;min-width:240px;background:var(--surface);border-right:1px solid var(--border);padding:12px;overflow-y:auto;max-height:calc(100vh - 120px);position:sticky;top:120px;}
+.lv-select-label{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:5px;display:block;}
+.lv-select{width:100%;padding:8px 30px 8px 10px;border:1.5px solid var(--border);border-radius:6px;background:var(--surface2);color:var(--text);font-size:12px;font-family:'Noto Sans JP',sans-serif;font-weight:600;cursor:pointer;appearance:none;-webkit-appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='6' viewBox='0 0 10 6'%3E%3Cpath d='M1 1l4 4 4-4' stroke='%238fa2b4' stroke-width='1.5' fill='none' stroke-linecap='round'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;margin-bottom:8px;transition:border-color .15s;}
+.lv-select:hover{border-color:var(--border2);}
 .lv-select:focus{outline:none;border-color:var(--sage);}
-.lv-info-bar{
-  border-radius:6px;padding:6px 9px;margin-bottom:9px;
-  font-size:10px;font-weight:500;color:#fff;line-height:1.55;
-}
-.btn-section{margin-bottom:7px;}
-.btn-section-title{
-  display:flex;align-items:center;gap:5px;
-  font-size:9px;font-weight:700;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.08em;
-  margin-bottom:3px;padding-bottom:3px;
-  border-bottom:1px solid var(--border);
-}
+.lv-info-bar{border-radius:6px;padding:7px 10px;margin-bottom:10px;font-size:10px;font-weight:500;color:#fff;line-height:1.55;}
+.btn-section{margin-bottom:10px;}
+.btn-section-title{display:flex;align-items:center;gap:5px;font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;padding-bottom:4px;border-bottom:1px solid var(--border);}
 .btn-section-title svg{width:10px;height:10px;flex-shrink:0;opacity:.75;stroke-width:2.2;}
 .lv-panel{display:none;}
 .lv-panel.active{display:block;}
-.txn-btn{
-  display:flex;justify-content:space-between;align-items:center;
-  width:100%;text-align:left;
-  padding:6px 8px 6px 10px;margin-bottom:1px;
-  border-radius:4px;border:none;
-  border-left:2px solid transparent;
-  background:transparent;color:var(--text2);
-  cursor:pointer;font-size:11.5px;font-weight:400;
-  font-family:'Noto Sans JP',sans-serif;
-  transition:all .12s;line-height:1.4;
-}
-.txn-btn:hover{
-  background:var(--bg2);
-  border-left-color:var(--sage);
-  color:var(--text);
-}
-.txn-btn .amt{
-  font-family:'JetBrains Mono',monospace;font-size:10px;
-  color:var(--text3);background:var(--bg3);
-  padding:1px 5px;border-radius:3px;
-  white-space:nowrap;flex-shrink:0;letter-spacing:.01em;
-}
+.txn-btn{display:flex;justify-content:space-between;align-items:center;width:100%;text-align:left;padding:7px 9px 7px 11px;margin-bottom:2px;border-radius:5px;border:none;border-left:2px solid transparent;background:transparent;color:var(--text2);cursor:pointer;font-size:12px;font-weight:400;font-family:'Noto Sans JP',sans-serif;transition:all .12s;line-height:1.4;}
+.txn-btn:hover{background:var(--bg2);border-left-color:var(--sage);color:var(--text);transform:translateX(1px);}
+.txn-btn .amt{font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);background:var(--bg3);padding:1px 6px;border-radius:3px;white-space:nowrap;flex-shrink:0;}
 
 /* ── MAIN ── */
-.main{flex:1;padding:10px;overflow-x:hidden;min-width:0;}
-.journal-strip{
-  background:var(--surface);border:1px solid var(--border);
-  border-left:3px solid var(--sage);
-  border-radius:var(--radius);padding:9px 13px;
-  margin-bottom:7px;min-height:48px;
-}
-.j-title{
-  font-size:9px;font-weight:700;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.08em;margin-bottom:3px;
-}
-.journal-entry{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text);}
-.journal-note{font-size:11px;color:var(--text2);margin-top:3px;line-height:1.55;}
+.main{flex:1;padding:14px 16px;overflow-x:hidden;min-width:0;}
+.journal-strip{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--sage);border-radius:var(--radius);padding:10px 15px;margin-bottom:8px;min-height:52px;}
+.j-title{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-bottom:4px;}
+.journal-entry{font-family:'JetBrains Mono',monospace;font-size:12.5px;color:var(--text);}
+.journal-note{font-size:12px;color:var(--text2);margin-top:4px;line-height:1.6;}
 .dr{color:var(--up);font-weight:600;}
 .cr{color:var(--down);font-weight:600;}
-
-.eq-bar{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:6px 12px;
-  margin-bottom:7px;
-  display:flex;align-items:center;gap:10px;font-size:11px;flex-wrap:wrap;
-}
+.eq-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:7px 14px;margin-bottom:8px;display:flex;align-items:center;gap:12px;font-size:12px;flex-wrap:wrap;}
 .eq-ok{color:var(--sage);font-weight:600;}
 .eq-ng{color:var(--down);font-weight:600;}
-.eq-formula{color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:11px;}
+.eq-formula{color:var(--text2);font-family:'JetBrains Mono',monospace;font-size:12px;}
+
+/* ── STATEMENT TABS — PC非表示 ── */
+.stmt-tabs{display:none;}
 
 /* ── STATEMENTS ── */
-.stmt-grid{
-  display:grid;grid-template-columns:1fr 1fr 1fr;
-  gap:8px;margin-bottom:8px;
-}
-@media(max-width:1100px){.stmt-grid{grid-template-columns:1fr 1fr;}}
-@media(max-width:700px){.stmt-grid{grid-template-columns:1fr;}}
-.stmt-card{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius2);overflow:hidden;box-shadow:var(--shadow);
-}
+.stmt-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px;margin-bottom:10px;}
+.stmt-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius2);overflow:hidden;box-shadow:var(--shadow);transition:box-shadow .15s;}
+.stmt-card:hover{box-shadow:0 2px 12px rgba(0,0,0,.10);}
 .stmt-card.pulse{animation:pulse .4s ease;}
-@keyframes pulse{
-  0%{box-shadow:0 0 0 0 rgba(62,112,104,.3)}
-  70%{box-shadow:0 0 0 7px transparent}
-  100%{box-shadow:var(--shadow)}
-}
-.stmt-head{
-  padding:8px 12px;font-size:11px;font-weight:700;color:#fff;
-  letter-spacing:.03em;display:flex;align-items:center;gap:6px;
-}
+@keyframes pulse{0%{box-shadow:0 0 0 0 rgba(62,112,104,.3)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:var(--shadow)}}
+.stmt-head{padding:9px 13px;font-size:12px;font-weight:700;color:#fff;letter-spacing:.03em;display:flex;align-items:center;gap:6px;}
 .stmt-head svg{width:13px;height:13px;opacity:.85;stroke-width:2.2;}
 .stmt-head.bs{background:var(--sage);}
 .stmt-head.pl{background:var(--navy);}
 .stmt-head.cf{background:var(--umber);}
-.stmt-body{padding:6px;}
+.stmt-body{padding:7px;}
 
-/* ── WC BAR (below statements) ── */
-.wc-bar{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:8px 12px;
-  margin-bottom:8px;
-  display:flex;align-items:center;gap:10px;flex-wrap:wrap;
-}
-.wc-title{
-  font-size:9px;font-weight:700;color:var(--text3);
-  text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;
-}
-.wc-metrics{display:flex;gap:6px;flex-wrap:wrap;flex:1;}
-.wc-m{
-  background:var(--bg2);border:1px solid var(--border);
-  border-radius:5px;padding:4px 9px;
-  display:flex;flex-direction:column;align-items:center;min-width:82px;
-}
+/* ── WC ── */
+.wc-bar{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:10px 14px;margin-bottom:10px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;}
+.wc-title{font-size:9px;font-weight:700;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;white-space:nowrap;}
+.wc-metrics{display:flex;gap:7px;flex:1;flex-wrap:wrap;}
+.wc-m{background:var(--bg2);border:1px solid var(--border);border-radius:5px;padding:5px 10px;display:flex;flex-direction:column;align-items:center;min-width:84px;}
 .wc-m-lbl{font-size:8.5px;color:var(--text3);font-weight:600;white-space:nowrap;}
-.wc-m-val{font-size:12px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:1px;}
+.wc-m-val{font-size:13px;font-weight:700;font-family:'JetBrains Mono',monospace;margin-top:1px;}
 .wc-m-val.warn{color:var(--umber);}
 .wc-m-val.ok{color:var(--sage);}
-.wc-params{display:flex;gap:7px;align-items:center;flex-wrap:wrap;}
-.wc-params label{
-  font-size:9.5px;color:var(--text3);
-  display:flex;align-items:center;gap:3px;white-space:nowrap;
-}
-.wc-params input{
-  width:42px;background:var(--surface2);
-  border:1px solid var(--border);color:var(--text);
-  border-radius:4px;padding:2px 4px;
-  font-size:11px;text-align:center;
-}
+.wc-params{display:flex;gap:8px;align-items:center;flex-wrap:wrap;}
+.wc-params label{font-size:10px;color:var(--text3);display:flex;align-items:center;gap:3px;white-space:nowrap;}
+.wc-params input{width:44px;background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:4px;padding:3px 4px;font-size:12px;text-align:center;transition:border-color .15s;}
+.wc-params input:focus{outline:none;border-color:var(--navy);}
 
-/* ── EQUITY BAR ── */
-.eq-struct{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:8px 13px;margin-bottom:8px;
-}
-.eq-struct h4{
-  font-size:9px;font-weight:700;color:var(--text3);
-  margin-bottom:6px;text-transform:uppercase;letter-spacing:.08em;
-}
-.eq-bar-track{height:7px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:4px;}
+/* ── EQUITY ── */
+.eq-struct{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 14px;margin-bottom:10px;}
+.eq-struct h4{font-size:9px;font-weight:700;color:var(--text3);margin-bottom:7px;text-transform:uppercase;letter-spacing:.08em;}
+.eq-bar-track{height:8px;background:var(--bg3);border-radius:4px;overflow:hidden;margin-bottom:4px;}
 .eq-bar-fill{height:100%;background:var(--sage);transition:width .45s cubic-bezier(.4,0,.2,1);}
-.eq-labels{display:flex;justify-content:space-between;font-size:9.5px;color:var(--text3);}
+.eq-labels{display:flex;justify-content:space-between;font-size:10px;color:var(--text3);}
 
 /* ── TABLES ── */
 table.stmt-tbl{width:100%;border-collapse:collapse;}
 table.stmt-tbl tr{border-bottom:1px solid var(--border);}
 table.stmt-tbl tr:last-child{border-bottom:none;}
-table.stmt-tbl td{padding:4px 5px;font-size:12px;line-height:1.4;}
-table.stmt-tbl td:last-child{
-  text-align:right;font-family:'JetBrains Mono',monospace;
-  font-weight:600;font-size:11px;white-space:nowrap;
-}
+table.stmt-tbl td{padding:4px 6px;font-size:12px;line-height:1.4;}
+table.stmt-tbl td:last-child{text-align:right;font-family:'JetBrains Mono',monospace;font-weight:600;font-size:11.5px;white-space:nowrap;}
 .row-group{background:var(--bg2);}
 .row-group td{font-weight:700;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;}
 .row-total td{font-weight:700;background:var(--bg3);font-size:12px;}
-.row-subtotal td{font-weight:600;background:var(--bg2);font-size:11px;color:var(--text2);}
+.row-subtotal td{font-weight:600;background:var(--bg2);font-size:11.5px;color:var(--text2);}
 .val-pos{color:var(--up);}
 .val-neg{color:var(--down);}
 .val-zero{color:var(--text3);}
-.indent1{padding-left:14px!important;}
+.indent1{padding-left:16px!important;}
+
+/* ── DuPont ── */
+#dupont-section{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius2);
+  overflow:hidden;
+  margin-bottom:8px;
+}
+.dupont-head{
+  padding:7px 12px;
+  background:var(--bg2);
+  border-bottom:1px solid var(--border);
+}
+.dupont-head-title{
+  font-size:10px;font-weight:700;color:var(--text2);letter-spacing:.04em;
+}
+.dupont-head-sub{
+  font-size:9px;color:var(--text3);margin-top:1px;
+  font-family:'JetBrains Mono',monospace;
+}
+#dupont-body{
+  padding:10px 12px;
+  display:flex;
+  align-items:center;
+  gap:6px;
+  flex-wrap:wrap;
+}
+.dp-block{
+  flex:1;min-width:90px;
+  background:var(--surface2);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:8px 10px;
+  text-align:center;
+}
+.dp-block.dp-result{
+  border-color:var(--navy);
+  background:rgba(42,74,124,.07);
+}
+.dp-label{
+  font-size:9.5px;color:var(--text3);
+  letter-spacing:.04em;margin-bottom:3px;font-weight:600;
+}
+.dp-val{
+  font-family:'JetBrains Mono',monospace;font-size:17px;
+  font-weight:600;color:var(--text);
+  margin-bottom:2px;
+}
+.dp-val.val-pos{color:var(--up);}
+.dp-val.val-neg{color:var(--down);}
+.dp-val.val-zero{color:var(--text3);}
+.dp-sub{font-size:9px;color:var(--text3);}
+.dp-op{
+  font-size:16px;color:var(--text3);
+  flex-shrink:0;padding:0 2px;font-weight:300;
+}
+@media(max-width:767px){
+  #dupont-body{gap:4px;}
+  .dp-block{min-width:72px;padding:7px 6px;}
+  .dp-val{font-size:14px;}
+  .dp-op{font-size:13px;}
+}
+
+/* ── ASSIST TOGGLE ── */
+.assist-toggle{
+  display:flex;align-items:center;gap:7px;cursor:pointer;
+  padding:4px 10px;border:1px solid var(--border);
+  border-radius:5px;background:transparent;
+  transition:border-color .15s, background .15s;
+  font-family:'Noto Sans JP',sans-serif;
+  min-height:32px;
+}
+.assist-toggle:hover{background:var(--bg2);border-color:var(--border2);}
+.assist-toggle.on{border-color:var(--sage);background:rgba(62,112,104,.06);}
+.assist-label{
+  font-size:11px;font-weight:500;color:var(--text3);
+  white-space:nowrap;transition:color .15s;
+}
+.assist-toggle.on .assist-label{color:var(--sage);}
+.assist-switch{
+  width:30px;height:17px;border-radius:9px;
+  background:var(--border2);position:relative;
+  transition:background .2s;flex-shrink:0;
+}
+.assist-toggle.on .assist-switch{background:var(--sage);}
+.assist-knob{
+  position:absolute;top:2px;left:2px;
+  width:13px;height:13px;border-radius:50%;
+  background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.2);
+  transition:transform .2s cubic-bezier(.4,0,.2,1);
+}
+.assist-toggle.on .assist-knob{transform:translateX(13px);}
+
+/* ── ASSIST MODAL ── */
+.modal-overlay{
+  position:fixed;inset:0;z-index:500;
+  background:rgba(26,37,53,.48);
+  -webkit-backdrop-filter:blur(3px);
+  backdrop-filter:blur(3px);
+  display:flex;align-items:center;justify-content:center;
+  padding:16px;
+  opacity:0;pointer-events:none;
+  transition:opacity .22s;
+}
+.modal-overlay.open{opacity:1;pointer-events:all;}
+.modal-box{
+  background:var(--surface);
+  border-radius:var(--radius2);
+  width:min(540px,90vw);
+  max-height:90vh;
+  display:flex;flex-direction:column;
+  box-shadow:0 8px 40px rgba(0,0,0,.22);
+  transform:translateY(14px);
+  transition:transform .25s cubic-bezier(.4,0,.2,1);
+}
+.modal-overlay.open .modal-box{transform:translateY(0);}
+.modal-head{
+  padding:13px 16px 11px;
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;justify-content:space-between;
+  flex-shrink:0;
+}
+.modal-title{font-size:14px;font-weight:700;color:var(--text);}
+.modal-tag{
+  font-size:9px;font-weight:700;text-transform:uppercase;
+  letter-spacing:.07em;color:var(--sage);
+  background:rgba(62,112,104,.1);
+  padding:2px 7px;border-radius:3px;
+}
+.modal-scroll{
+  flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  max-height:70vh;padding:14px 16px;
+  display:flex;flex-direction:column;gap:12px;
+}
+/* Block 1: 仕訳 */
+.mod-jnl{
+  background:var(--surface2);border:1px solid var(--border);
+  border-left:3px solid var(--sage);border-radius:var(--radius);
+  padding:10px 13px;
+}
+.mod-blk-lbl{
+  font-size:9px;font-weight:700;color:var(--text3);
+  text-transform:uppercase;letter-spacing:.08em;margin-bottom:6px;
+}
+.mod-jnl-entry{
+  font-family:'JetBrains Mono',monospace;font-size:12.5px;
+  line-height:1.6;
+}
+.mod-dr{color:var(--up);font-weight:600;}
+.mod-cr{color:var(--down);font-weight:600;}
+/* Block 2: なぜ */
+.mod-why{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 13px;
+}
+.mod-why-txt{font-size:12px;color:var(--text2);line-height:1.7;}
+/* Block 3: 三表影響 */
+.mod-impact{
+  background:var(--surface2);border:1px solid var(--border);
+  border-radius:var(--radius);padding:10px 13px;
+}
+.mod-impact-row{
+  display:flex;align-items:baseline;gap:8px;
+  padding:3px 0;font-size:12px;
+  border-bottom:1px solid var(--border);
+}
+.mod-impact-row:last-child{border-bottom:none;}
+.mod-impact-key{
+  font-size:9px;font-weight:700;
+  color:#fff;border-radius:3px;padding:1px 6px;
+  flex-shrink:0;letter-spacing:.04em;
+}
+.mod-impact-key.bs{background:var(--sage);}
+.mod-impact-key.pl{background:var(--navy);}
+.mod-impact-key.cf{background:var(--umber);}
+.mod-impact-val{color:var(--text2);line-height:1.5;}
+.mod-impact-val.ipos{color:var(--up);font-weight:500;}
+.mod-impact-val.ineg{color:var(--down);font-weight:500;}
+.mod-impact-val.inone{color:var(--text3);}
+/* Block 4: 実務ポイント */
+.mod-tip{
+  background:rgba(62,112,104,.06);
+  border:1px solid rgba(62,112,104,.2);
+  border-radius:var(--radius);padding:10px 13px;
+}
+.mod-tip-txt{font-size:12px;color:var(--text2);line-height:1.7;}
+.mod-tip-txt b{color:var(--sage);}
+/* Footer */
+.modal-foot{
+  padding:11px 16px;border-top:1px solid var(--border);
+  display:flex;gap:8px;justify-content:flex-end;
+  flex-shrink:0;
+}
+.mod-btn-cancel{
+  background:transparent;border:1px solid var(--border);
+  color:var(--text2);padding:7px 16px;border-radius:6px;
+  cursor:pointer;font-size:12px;font-weight:500;
+  font-family:'Noto Sans JP',sans-serif;transition:all .15s;
+  min-height:36px;
+}
+.mod-btn-cancel:hover{background:var(--bg2);}
+.mod-btn-exec{
+  background:var(--sage);border:none;
+  color:#fff;padding:7px 18px;border-radius:6px;
+  cursor:pointer;font-size:12px;font-weight:700;
+  font-family:'Noto Sans JP',sans-serif;transition:background .15s;
+  min-height:36px;
+  box-shadow:0 2px 8px rgba(62,112,104,.35);
+}
+.mod-btn-exec:hover{background:var(--sage-dark,#2c5550);}
+@media(max-width:767px){
+  .modal-scroll{max-height:60vh;padding:10px 12px;gap:8px;}
+  .modal-foot{padding:9px 12px;}
+}
 
 /* ── LOG ── */
-.log-section{
-  background:var(--surface);border:1px solid var(--border);
-  border-radius:var(--radius);padding:9px 13px;
-}
+.log-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius);padding:9px 13px;}
 .log-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px;}
 .log-title{font-size:11px;font-weight:700;color:var(--text2);}
-.btn-clear{
-  background:transparent;border:1px solid var(--border);
-  color:var(--text3);padding:3px 8px;border-radius:4px;
-  cursor:pointer;font-size:10px;transition:all .12s;
-}
-.btn-clear:hover{border-color:var(--text3);color:var(--text2);}
+.btn-clear{background:transparent;border:1px solid var(--border);color:var(--text3);padding:3px 8px;border-radius:4px;cursor:pointer;font-size:10px;}
 .log-list{max-height:140px;overflow-y:auto;}
-.log-card{
-  display:flex;align-items:flex-start;gap:7px;padding:4px 0;
-  border-bottom:1px solid var(--border2);font-size:10.5px;
-}
+.log-card{display:flex;align-items:flex-start;gap:7px;padding:4px 0;border-bottom:1px solid var(--border2);font-size:10.5px;}
 .log-card:last-child{border-bottom:none;}
 .log-dot{width:6px;height:6px;border-radius:50%;margin-top:3px;flex-shrink:0;}
 .log-meta{color:var(--text3);font-size:9.5px;margin-right:3px;white-space:nowrap;font-family:'JetBrains Mono',monospace;}
 .log-txt{color:var(--text2);}
+
+/* ── modal mobile tweak ──*/
+@media(max-width:900px){
+  .modal-scroll{max-height:65vh;padding:11px 13px;gap:9px;}
+}
 </style>
 </head>
 <body>
 
+<!-- ━━ TOP NAV ━━ -->
+<nav style="background:var(--surface);border-bottom:1px solid var(--border);padding:0 20px;height:44px;display:flex;align-items:center;gap:0;position:sticky;top:0;z-index:101;box-shadow:var(--shadow);">
+  <div style="font-size:14px;font-weight:700;color:var(--sage);display:flex;align-items:center;gap:6px;padding-right:18px;border-right:1px solid var(--border);margin-right:10px;white-space:nowrap;">
+    <i data-lucide="bar-chart-3" style="width:16px;height:16px;stroke-width:2;"></i>FinSim
+  </div>
+  <a href="index.html" style="display:flex;align-items:center;gap:5px;padding:0 14px;height:44px;font-size:12px;font-weight:700;color:var(--sage);text-decoration:none;border-bottom:2px solid var(--sage);white-space:nowrap;">
+    <i data-lucide="table-2" style="width:13px;height:13px;stroke-width:2;"></i>財務三表
+  </a>
+  <a href="finance.html" style="display:flex;align-items:center;gap:5px;padding:0 14px;height:44px;font-size:12px;font-weight:500;color:var(--text3);text-decoration:none;border-bottom:2px solid transparent;white-space:nowrap;transition:color .15s;" onmouseover="this.style.color='var(--text2)'" onmouseout="this.style.color='var(--text3)'">
+    <i data-lucide="trending-up" style="width:13px;height:13px;stroke-width:2;opacity:.8;"></i>コーポレートファイナンス
+  </a>
+</nav>
+
+<!-- ━━ HEADER ━━ -->
 <div class="header">
   <div class="header-top">
-    <div style="display:flex;align-items:center;gap:9px;">
-      <span class="app-title">
-        <i data-lucide="bar-chart-3"></i>
-        財務三表 シミュレーター
-      </span>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <span class="app-title"><i data-lucide="bar-chart-3"></i>財務三表</span>
       <span class="period-chip" id="period-chip">第1期</span>
     </div>
-    <button class="btn-reset" onclick="resetAll()">
-      <i data-lucide="rotate-ccw"></i>
-      リセット
-    </button>
+    <div style="display:flex;align-items:center;gap:8px;">
+      <div class="assist-toggle" id="assist-toggle" onclick="toggleAssistMode()">
+        <span class="assist-label" id="assist-label">補助モード OFF</span>
+        <div class="assist-switch"><div class="assist-knob"></div></div>
+      </div>
+      <button class="btn-reset" onclick="resetAll()">
+        <i data-lucide="rotate-ccw"></i>リセット
+      </button>
+    </div>
   </div>
   <div class="kpi-row">
     <div class="kpi"><div class="kpi-label">総資産</div><div class="kpi-val" id="kpi-ta">¥10,000</div></div>
@@ -304,105 +391,182 @@ table.stmt-tbl td:last-child{
     <div class="kpi"><div class="kpi-label">純利益</div><div class="kpi-val" id="kpi-ni">—</div></div>
     <div class="kpi"><div class="kpi-label">現金</div><div class="kpi-val" id="kpi-cash">¥10,000</div></div>
     <div class="kpi"><div class="kpi-label">自己資本比率</div><div class="kpi-val" id="kpi-er">100.0%</div></div>
-    <div class="kpi"><div class="kpi-label">繰越利益剰余金</div><div class="kpi-val" id="kpi-re">—</div></div>
+    <div class="kpi"><div class="kpi-label">利益剰余金</div><div class="kpi-val" id="kpi-re">—</div></div>
+    <div class="kpi"><div class="kpi-label">ROE</div><div class="kpi-val" id="k-roe">—</div></div>
+    <div class="kpi"><div class="kpi-label">ROA</div><div class="kpi-val" id="k-roa">—</div></div>
   </div>
 </div>
 
+<!-- ━━ APP BODY ━━ -->
 <div class="app-body">
 
-<div class="sidebar">
-  <span class="lv-select-label">学習レベル</span>
-  <select class="lv-select" id="lv-select" onchange="switchLevel(parseInt(this.value))">
-    <option value="1">Lv.1 ── 入門</option>
-    <option value="2">Lv.2 ── 初級</option>
-    <option value="3">Lv.3 ── 中級</option>
-    <option value="4">Lv.4 ── 準上級</option>
-    <option value="5">Lv.5 ── 上級</option>
-    <option value="6">Lv.6 ── 超上級</option>
-    <option value="7">Lv.7 ── エキスパート</option>
-    <option value="8">Lv.8 ── プロ</option>
-    <option value="9">Lv.9 ── マスター</option>
-    <option value="10">Lv.10 ── 総復習</option>
-  </select>
-  <div class="lv-info-bar" id="lv-info-bar"></div>
-  <div id="panels-container"></div>
-</div>
-
-<div class="main">
-
-  <div class="journal-strip">
-    <div class="j-title">仕訳 / 解説</div>
-    <div class="journal-entry" id="journal-entry">（取引ボタンを押すと仕訳が表示されます）</div>
-    <div class="journal-note" id="journal-note"></div>
+  <!-- Desktop sidebar -->
+  <div class="sidebar">
+    <span class="lv-select-label">学習レベル</span>
+    <select class="lv-select" id="lv-select" onchange="switchLevel(parseInt(this.value))">
+      <option value="1">Lv.1 ── 入門</option>
+      <option value="2">Lv.2 ── 初級</option>
+      <option value="3">Lv.3 ── 中級</option>
+      <option value="4">Lv.4 ── 準上級</option>
+      <option value="5">Lv.5 ── 上級</option>
+      <option value="6">Lv.6 ── 超上級</option>
+      <option value="7">Lv.7 ── エキスパート</option>
+      <option value="8">Lv.8 ── プロ</option>
+      <option value="9">Lv.9 ── マスター</option>
+      <option value="10">Lv.10 ── 総復習</option>
+    </select>
+    <div class="lv-info-bar" id="lv-info-bar"></div>
+    <div id="panels-container"></div>
   </div>
 
-  <div class="eq-bar">
-    <span id="eq-status" class="eq-ok">BS 均衡</span>
-    <span class="eq-formula" id="eq-formula">資産 ¥10,000 ＝ 負債 ¥0 ＋ 純資産 ¥10,000</span>
-  </div>
+  <!-- Main -->
+  <div class="main">
 
-  <div class="stmt-grid">
-    <div class="stmt-card" id="card-bs">
-      <div class="stmt-head bs">
-        <i data-lucide="table-2"></i>
-        貸借対照表（BS）
+    <!-- Journal: desktop inline, mobile fixed -->
+    <div class="journal-strip" id="journal-strip">
+      <div class="j-title">仕訳 / 解説</div>
+      <div class="journal-entry" id="journal-entry">（取引ボタンを押すと仕訳が表示されます）</div>
+      <div class="journal-note" id="journal-note"></div>
+    </div>
+
+    <div class="eq-bar">
+      <span id="eq-status" class="eq-ok">BS 均衡</span>
+      <span class="eq-formula" id="eq-formula">資産 ¥10,000 ＝ 負債 ¥0 ＋ 純資産 ¥10,000</span>
+    </div>
+
+    <!-- Statement tabs: PC では非表示 -->
+
+    <div class="stmt-grid">
+      <div class="stmt-card" id="card-bs">
+        <div class="stmt-head bs"><i data-lucide="table-2"></i>貸借対照表（BS）</div>
+        <div class="stmt-body" id="bs-body"></div>
       </div>
-      <div class="stmt-body" id="bs-body"></div>
-    </div>
-    <div class="stmt-card" id="card-pl">
-      <div class="stmt-head pl">
-        <i data-lucide="trending-up"></i>
-        損益計算書（PL）
+      <div class="stmt-card" id="card-pl">
+        <div class="stmt-head pl"><i data-lucide="trending-up"></i>損益計算書（PL）</div>
+        <div class="stmt-body" id="pl-body"></div>
       </div>
-      <div class="stmt-body" id="pl-body"></div>
-    </div>
-    <div class="stmt-card" id="card-cf">
-      <div class="stmt-head cf">
-        <i data-lucide="activity"></i>
-        キャッシュフロー計算書（CF）
+      <div class="stmt-card" id="card-cf">
+        <div class="stmt-head cf"><i data-lucide="activity"></i>キャッシュフロー計算書（CF）</div>
+        <div class="stmt-body" id="cf-body"></div>
       </div>
-      <div class="stmt-body" id="cf-body"></div>
     </div>
-  </div>
 
-  <!-- 運転資本管理 は三表の下に移動 -->
-  <div class="wc-bar">
-    <div class="wc-title">運転資本管理</div>
-    <div class="wc-metrics">
-      <div class="wc-m"><div class="wc-m-lbl">売掛金（AR）</div><div class="wc-m-val" id="wc-ar">¥0</div></div>
-      <div class="wc-m"><div class="wc-m-lbl">棚卸資産（INV）</div><div class="wc-m-val" id="wc-inv">¥0</div></div>
-      <div class="wc-m"><div class="wc-m-lbl">買掛金（AP）</div><div class="wc-m-val" id="wc-ap">¥0</div></div>
-      <div class="wc-m"><div class="wc-m-lbl">DSO 売掛回転日数</div><div class="wc-m-val" id="wc-dso">—</div></div>
-      <div class="wc-m"><div class="wc-m-lbl">DPO 買掛回転日数</div><div class="wc-m-val" id="wc-dpo">—</div></div>
-      <div class="wc-m"><div class="wc-m-lbl">DIO 在庫回転日数</div><div class="wc-m-val" id="wc-dio">—</div></div>
-      <div class="wc-m"><div class="wc-m-lbl">CCC 現金循環日数</div><div class="wc-m-val" id="wc-ccc">—</div></div>
+    <div id="dupont-section">
+      <div class="dupont-head">
+        <div class="dupont-head-title">収益性分析 — デュポン分解</div>
+        <div class="dupont-head-sub">ROE = 利益率 × 資産回転率 × 財務レバレッジ</div>
+      </div>
+      <div id="dupont-body">
+        <div class="dp-block">
+          <div class="dp-label">当期純利益率</div>
+          <div class="dp-val" id="dp-npm">—</div>
+          <div class="dp-sub">NI ÷ 売上高</div>
+        </div>
+        <div class="dp-op">×</div>
+        <div class="dp-block">
+          <div class="dp-label">総資産回転率</div>
+          <div class="dp-val" id="dp-tat">—</div>
+          <div class="dp-sub">売上高 ÷ 総資産</div>
+        </div>
+        <div class="dp-op">×</div>
+        <div class="dp-block">
+          <div class="dp-label">財務レバレッジ</div>
+          <div class="dp-val" id="dp-lev">—</div>
+          <div class="dp-sub">総資産 ÷ 純資産</div>
+        </div>
+        <div class="dp-op">=</div>
+        <div class="dp-block dp-result">
+          <div class="dp-label">ROE</div>
+          <div class="dp-val" id="dp-roe">—</div>
+          <div class="dp-sub">純利益 ÷ 純資産</div>
+        </div>
+      </div>
     </div>
-    <div class="wc-params">
-      <label>目標DSO <input type="number" id="tgt-dso" value="30" min="1" max="365"></label>
-      <label>目標DPO <input type="number" id="tgt-dpo" value="45" min="1" max="365"></label>
-      <label>目標DIO <input type="number" id="tgt-dio" value="60" min="1" max="365"></label>
-    </div>
-  </div>
 
-  <div class="eq-struct">
-    <h4>資本構成 — 自己資本 vs 負債</h4>
-    <div class="eq-bar-track"><div class="eq-bar-fill" id="eq-bar-fill" style="width:100%"></div></div>
-    <div class="eq-labels">
-      <span id="eq-lbl-e">自己資本 ¥10,000 (100%)</span>
-      <span id="eq-lbl-d">負債 ¥0 (0%)</span>
+    <div class="wc-bar">
+      <div class="wc-title">運転資本管理</div>
+      <div class="wc-metrics">
+        <div class="wc-m"><div class="wc-m-lbl">AR 売掛金</div><div class="wc-m-val" id="wc-ar">¥0</div></div>
+        <div class="wc-m"><div class="wc-m-lbl">INV 棚卸資産</div><div class="wc-m-val" id="wc-inv">¥0</div></div>
+        <div class="wc-m"><div class="wc-m-lbl">AP 買掛金</div><div class="wc-m-val" id="wc-ap">¥0</div></div>
+        <div class="wc-m"><div class="wc-m-lbl">DSO 売掛回転</div><div class="wc-m-val" id="wc-dso">—</div></div>
+        <div class="wc-m"><div class="wc-m-lbl">DPO 買掛回転</div><div class="wc-m-val" id="wc-dpo">—</div></div>
+        <div class="wc-m"><div class="wc-m-lbl">DIO 在庫回転</div><div class="wc-m-val" id="wc-dio">—</div></div>
+        <div class="wc-m"><div class="wc-m-lbl">CCC 現金循環</div><div class="wc-m-val" id="wc-ccc">—</div></div>
+      </div>
+      <div class="wc-params">
+        <label>目標DSO <input type="number" id="tgt-dso" value="30" min="1" max="365"></label>
+        <label>目標DPO <input type="number" id="tgt-dpo" value="45" min="1" max="365"></label>
+        <label>目標DIO <input type="number" id="tgt-dio" value="60" min="1" max="365"></label>
+      </div>
     </div>
-  </div>
 
-  <div class="log-section">
-    <div class="log-head">
-      <span class="log-title">取引ログ</span>
-      <button class="btn-clear" onclick="clearLog()">消去</button>
+    <div class="eq-struct">
+      <h4>資本構成 — 自己資本 vs 負債</h4>
+      <div class="eq-bar-track"><div class="eq-bar-fill" id="eq-bar-fill" style="width:100%"></div></div>
+      <div class="eq-labels">
+        <span id="eq-lbl-e">自己資本 ¥10,000 (100%)</span>
+        <span id="eq-lbl-d">負債 ¥0 (0%)</span>
+      </div>
     </div>
-    <div class="log-list" id="log-list">（取引はここに記録されます）</div>
-  </div>
 
-</div><!-- /main -->
+    <div class="log-section">
+      <div class="log-head">
+        <span class="log-title">取引ログ</span>
+        <button class="btn-clear" onclick="clearLog()">消去</button>
+      </div>
+      <div class="log-list" id="log-list">（取引はここに記録されます）</div>
+    </div>
+
+  </div><!-- /main -->
 </div><!-- /app-body -->
+
+<!-- ━━ ASSIST MODAL ━━ -->
+<div class="modal-overlay" id="assist-modal-overlay" onclick="handleModalOverlayClick(event)">
+  <div class="modal-box" onclick="event.stopPropagation()">
+    <div class="modal-head">
+      <span class="modal-title" id="mod-title">—</span>
+      <span class="modal-tag">補助モード</span>
+    </div>
+    <div class="modal-scroll">
+      <!-- Block 1: 仕訳 -->
+      <div class="mod-jnl">
+        <div class="mod-blk-lbl">仕訳</div>
+        <div class="mod-jnl-entry" id="mod-jnl"></div>
+      </div>
+      <!-- Block 2: なぜこの仕訳？ -->
+      <div class="mod-why">
+        <div class="mod-blk-lbl">なぜこの仕訳？</div>
+        <div class="mod-why-txt" id="mod-why"></div>
+      </div>
+      <!-- Block 3: 財務三表への影響 -->
+      <div class="mod-impact">
+        <div class="mod-blk-lbl">財務三表への影響</div>
+        <div class="mod-impact-row">
+          <span class="mod-impact-key bs">BS</span>
+          <span class="mod-impact-val" id="mod-bs"></span>
+        </div>
+        <div class="mod-impact-row">
+          <span class="mod-impact-key pl">PL</span>
+          <span class="mod-impact-val" id="mod-pl"></span>
+        </div>
+        <div class="mod-impact-row">
+          <span class="mod-impact-key cf">CF</span>
+          <span class="mod-impact-val" id="mod-cf"></span>
+        </div>
+      </div>
+      <!-- Block 4: 実務ポイント -->
+      <div class="mod-tip">
+        <div class="mod-blk-lbl">実務ポイント</div>
+        <div class="mod-tip-txt" id="mod-tip"></div>
+      </div>
+    </div>
+    <div class="modal-foot">
+      <button class="mod-btn-cancel" onclick="closeModal()">キャンセル</button>
+      <button class="mod-btn-exec" onclick="execPending()">この取引を実行する</button>
+    </div>
+  </div>
+</div>
 
 <script src="app.js"></script>
 </body>
